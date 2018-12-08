@@ -7,7 +7,7 @@ https://github.com/RayanWang/Speech_emotion_recognition_BLSTM
 ## To do
 Train model with 5 emotions--strip out neutral.
 
-##Usage
+## Usage
 ```python = 3.6.7``` ```keras=2.2.4``` ```tensorflow=1.8.0```
 ```
 from predict import load_model,get_audioclass

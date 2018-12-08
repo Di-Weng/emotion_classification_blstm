@@ -14,9 +14,12 @@ from predict import load_model,get_audioclass
 
 Load model: 
 model = load_model('model/best_model.h5')
+
 get_result: 
-predict_class,predict_prob = get_audioclass(model,wav_file_path):
+predict_class,predict_prob = get_audioclass(model,wav_file_path)
+
 get_allaudio:  
-predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all = True):
-result_dic: {class:prob}
+# result_dic: {class:prob}
+predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all = True)
+
 ```

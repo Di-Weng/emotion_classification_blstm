@@ -18,7 +18,8 @@ Sample Rate = 16000
 CHANNELS = 1
  
 Usage：
-Load model: model = load_model('model/best_model.h5')
+Load model: 
+model = load_model('model/best_model.h5')
 
 get_result: 
 predict_class,predict_prob = get_audioclass(model,wav_file_path):

@@ -18,7 +18,7 @@ model = load_model('model/best_model.h5')
 get_result: 
 predict_class,predict_prob = get_audioclass(model,wav_file_path)
 
-get_allaudio:  
+get_allresult:  
 # result_dic: {class:prob}
 predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all = True)
 

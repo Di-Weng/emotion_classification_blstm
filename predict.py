@@ -5,9 +5,30 @@
    Author  : diw
    Email   : di.W@hotmail.com
    File    : predict.py
-   Desc:
+   Desc:   Load model, predict audio's class.
 -------------------------------
 """
+
+"""
+audio_class = ['angry','fear','happy','neutral','sad','surprise']
+
+Input audio's format: 
+BIT DEPTH = 16（paInt16）
+Sample Rate = 16000
+CHANNELS = 1
+ 
+Usage：
+Load model: model = load_model('model/best_model.h5')
+
+get_result: 
+predict_class,predict_prob = get_audioclass(model,wav_file_path):
+
+get_allaudio:  
+predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all = True):
+result_dic: {class:prob}
+
+"""
+
 from keras.models import load_model
 from pyAudioAnalysis import audioFeatureExtraction
 from keras.preprocessing import sequence
@@ -140,6 +161,24 @@ def analyse_emotionn(model,test_file):
     print('因此，当前语音的情感为：%s, 概率为：%.2f%%' %
           (str(predict_class), predict_prob * 100))
 
+def get_audioclass(model,test_file,all = False):
+    data, sr = get_data(test_file)
+    f = extract_dataset_tosequence(data, sr)
+    f_ex = np.full((f.shape[0], nb_attention_param),
+                   attention_init_value, dtype=np.float32)
+    predict_output = model.predict([f_ex, f])
+    predict_prob, predict_label = find_max(predict_output)
+    predict_class = classes[predict_label]
+    class_dic = {}
+    for i in range(len(predict_output[0])):
+        current_prob = predict_output[0][i]
+        current_class = classes[i]
+        class_dic[current_class] = current_prob
+        print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
+              (str(current_class), current_prob * 100))
+    if(all):
+        return class_dic
+    return predict_class,predict_prob
 
 if __name__ == '__main__':
 

@@ -5,7 +5,7 @@
    Author  : diw
    Email   : di.W@hotmail.com
    File    : get_audio.py
-   Desc:
+   Desc:   this .py file is only for test of getting audio using python. It will be deleted it later.
 -------------------------------
 """
 import pyaudio

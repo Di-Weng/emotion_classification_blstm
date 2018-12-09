@@ -209,12 +209,31 @@
 			};
 
 			function uploadRecord(){
-                alert("开始上传");
-                var url="static/wavsourse/1.wav";
-				recorder.shangchuan(url,obtainRecord());
-				alert("上传结束");
+                // alert("开始上传");
+                // var url="{{ url_for('get_audio') }}";
+				// recorder.shangchuan(url,obtainRecord());
+				recorder.shangchuan("{{ url_for('get_audio') }}", function(state, e) {
+                    switch (state) {
+                        case 'uploading':
+                            alert("上传中");
+                            break;
+                        case 'ok':
+                            alert("上传成功");
+                            break;
+                        case 'error':
+                            alert("上传失败");
+                            break;
+                        case 'cancel':
+                            alert("上传被取消");
+                            break;
+                    }
+                });
+				// alert("上传结束");
 
 			};
+
+
+
 </script>
 
         	<div class="row">

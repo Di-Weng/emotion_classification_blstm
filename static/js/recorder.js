@@ -12,7 +12,7 @@
 
         config = config || {};
 
-        config.sampleBits = config.sampleBits || 8;      //采样数位 8, 16
+        config.sampleBits = config.sampleBits || 16;      //采样数位 8, 16
 
         config.sampleRate = config.sampleRate || (44100 / 6);   //采样率(1/6 44100)
 
@@ -52,7 +52,7 @@
 
         // 第二个和第三个参数指的是输入和输出都是双声道。
 
-        var recorder = context.createScriptProcessor(bufferSize, 2, 2);
+        var recorder = context.createScriptProcessor(bufferSize, 1, 1);
 
 
 
@@ -66,9 +66,9 @@
 
             , inputSampleBits: 16       //输入采样数位 8, 16
 
-            , outputSampleRate: config.sampleRate    //输出采样率
+            , outputSampleRate: 16000    //输出采样率
 
-            , oututSampleBits: config.sampleBits       //输出采样数位 8, 16
+            , oututSampleBits: 16       //输出采样数位 8, 16
 
             , input: function (data) {
 
@@ -287,7 +287,6 @@
         //上传
 
         this.shangchuan = function (url,callback) {
-
             // +(new Date()).valueOf()+"_"+(Math.ceil(Math.random()*10000)).toString()
             var fd = new FormData();
             fd.append('audioData', this.getBlob());
@@ -382,7 +381,7 @@
 
                             case 'NotSupportedError':
 
-                                HZRecorder.throwError('<a href="http://www.it165.net/edu/ewl/" target="_blank" class="keylink">浏览器</a>不支持硬件设备。');
+                                HZRecorder.throwError('浏览器不支持硬件设备。');
 
                                 break;
 
@@ -406,7 +405,7 @@
 
             } else {
 
-                HZRecorder.throwErr('当前<a href="http://www.it165.net/edu/ewl/" target="_blank" class="keylink">浏览器</a>不支持录音功能。'); return;
+                HZRecorder.throwErr('当前浏览器不支持录音功能。'); return;
 
             }
 

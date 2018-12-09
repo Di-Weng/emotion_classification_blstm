@@ -87,7 +87,7 @@ def test():
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
     if request.method == 'POST':
-        request.files['file'].save('a.wav')
+        request.files['audioData'].save('a.wav')
 
     return render_template('login.html')
 if __name__ == '__main__':

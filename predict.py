@@ -178,7 +178,7 @@ def get_audioclass(model,test_file,all = False):
         print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
               (str(current_class), current_prob * 100))
     if(all):
-        return class_dic
+        return predict_class,predict_prob,class_dic
     return predict_class,predict_prob
 
 if __name__ == '__main__':

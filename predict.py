@@ -42,8 +42,10 @@ import os
 #获取音频
 from get_audio import microphone_audio
 
-classes = {0: 'angry', 1: 'fear', 2: 'happy',
-           3: 'neutral', 4: 'sad', 5: 'surprise'}
+# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
+
+classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
+
 max_len = 1024
 nb_features = 36
 nb_attention_param = 256
@@ -189,13 +191,15 @@ if __name__ == '__main__':
     # RATE = 16000
 
     test_file = 'input.wav'
-    # test_model(model_path,test_folder)
+    test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
     model_path = 'model/best_model.h5'
     model = load_model(model_path)
 
-    #获取音频
-    microphone_audio(test_file)
+    test_model(model_path,test_folder)
 
-    #验证模型正确率
-    analyse_emotionn(model,test_file)
+    # #获取音频
+    # microphone_audio(test_file)
+    #
+    # #验证模型正确率
+    # analyse_emotionn(model,test_file)
 

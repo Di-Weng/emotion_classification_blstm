@@ -4,6 +4,9 @@ from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 from contextlib import closing
 import os
+import datetime
+import random
+import predict
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -87,9 +90,19 @@ def test():
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
     if request.method == 'POST':
-        request.files['audioData'].save('a.wav')
+        timenow=datetime.datetime.now()
+        filename="recordFiles/"+datetime.datetime.strftime(timenow,'%Y%m%d%H%M%S')+"_"+str(random.randint(1,10000))+".wav"
+        request.files['audioData'].save(filename)
+        # test_model(model_path,test_folder)
+        model_path = 'model/best_model.h5'
+        model = predict.load_model(model_path)
+
+        predict.analyse_emotionn(filename)#运行模型
+
 
     return render_template('login.html')
+
+
 if __name__ == '__main__':
     app.run()
 

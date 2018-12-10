@@ -155,6 +155,7 @@ def test_model(model_path, test_folder):
     print('Total accuracy: %.2f%%' % (total_accuracy * 100))
 
 def analyse_emotionn(model,test_file):
+    dic = {}
     data, sr = get_data(test_file)
     f = extract_dataset_tosequence(data, sr)
     f_ex = np.full((f.shape[0], nb_attention_param),
@@ -165,11 +166,12 @@ def analyse_emotionn(model,test_file):
     for i in range(len(predict_output[0])):
         current_prob = predict_output[0][i]
         current_class = classes[i]
-        print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
-              (str(current_class), current_prob * 100))
-
-    print('因此，当前语音的情感为：%s, 概率为：%.2f%%' %
-          (str(predict_class), predict_prob * 100))
+        # print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
+              # (str(current_class), current_prob * 100))
+        dic[current_class] = current_prob * 100
+    # print('因此，当前语音的情感为：%s, 概率为：%.2f%%' %
+          # (str(predict_class), predict_prob * 100))
+    return dic
 
 def get_audioclass(model,test_file,model_type = 'emotion',all = False):
     if(model_type == 'emotion'):

@@ -19,10 +19,10 @@ PASSWORD = 'default'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-emotion_model_path = 'model/best_model.h5'
+emotion_model_path = 'model/best_model_2.h5'
 
 # model trainning :)
-gender_model_path = ''
+gender_model_path = 'model/gender_model.h5'
 
 emotion_model = load_model(emotion_model_path)
 gender_model = load_model(gender_model_path)

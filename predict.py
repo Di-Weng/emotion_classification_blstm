@@ -118,39 +118,68 @@ def find_max(list_iter):
     return max, index
 
 # test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-def test_model(model_path, test_folder):
+def test_model(model_path, test_folder, model_type = 'emotion'):
 
     model = load_model(model_path)
     emotion_list = os.listdir(test_folder)
     total = 0
     count = 0
-    for current_emotion in emotion_list:
-        if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
-            continue
-
-        emotion_total = 0
-        emotion_count = 0
-        current_emotion_path = test_folder + '/' + current_emotion
-        test_file_list = os.listdir(current_emotion_path)
-        for current_test_file in test_file_list:
-            if (current_test_file == '.DS_Store' or current_test_file == '_desktop.ini'):
+    if (model_type == 'emotion'):
+        for current_emotion in emotion_list:
+            if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
                 continue
 
-            test_file_path = current_emotion_path + '/' + current_test_file
-            data, sr = get_data(test_file_path)
-            f = extract_dataset_tosequence(data, sr)
-            f_ex = np.full((f.shape[0], nb_attention_param),
-                           attention_init_value, dtype=np.float32)
-            predict_output = model.predict([f_ex, f])
-            predict_prob, predict_label = find_max(predict_output)
-            predict_class = classes[predict_label]
-            total += 1
-            emotion_total += 1
-            if(predict_class == current_emotion):
-                emotion_count += 1
-                count += 1
-        current_accuracy = float(emotion_count) / emotion_total
-        print('%s accuracy: %.2f%%' % (str(current_emotion), current_accuracy * 100))
+            emotion_total = 0
+            emotion_count = 0
+            current_emotion_path = test_folder + '/' + current_emotion
+            test_file_list = os.listdir(current_emotion_path)
+            for current_test_file in test_file_list:
+                if (current_test_file == '.DS_Store' or current_test_file == '_desktop.ini'):
+                    continue
+
+                test_file_path = current_emotion_path + '/' + current_test_file
+                data, sr = get_data(test_file_path)
+                f = extract_dataset_tosequence(data, sr)
+                f_ex = np.full((f.shape[0], nb_attention_param),
+                               attention_init_value, dtype=np.float32)
+                predict_output = model.predict([f_ex, f])
+                predict_prob, predict_label = find_max(predict_output)
+                predict_class = classes[predict_label]
+                total += 1
+                emotion_total += 1
+                if(predict_class == current_emotion):
+                    emotion_count += 1
+                    count += 1
+            current_accuracy = float(emotion_count) / emotion_total
+            print('%s accuracy: %.2f%%' % (str(current_emotion), current_accuracy * 100))
+    elif(model_type == 'gender'):
+        speaker_class = {'ZhaoZuoxiang':0, 'wangzhe':0, 'zhaoquanyin':1, 'liuchanhg':1}
+        for current_emotion in emotion_list:
+            if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
+                continue
+
+            gender_total = 0
+            gender_count = 0
+            current_emotion_path = test_folder + '/' + current_emotion
+            test_file_list = os.listdir(current_emotion_path)
+            for current_test_file in test_file_list:
+                if (current_test_file == '.DS_Store' or current_test_file == '_desktop.ini'):
+                    continue
+                current_gender = speaker_class[current_test_file.split('_')[1]]
+                test_file_path = current_emotion_path + '/' + current_test_file
+                data, sr = get_data(test_file_path)
+                f = extract_dataset_tosequence(data, sr)
+                f_ex = np.full((f.shape[0], nb_attention_param),
+                               attention_init_value, dtype=np.float32)
+                predict_output = model.predict([f_ex, f])
+                predict_prob, predict_label = find_max(predict_output)
+                total += 1
+                gender_total += 1
+                if (predict_label == current_gender):
+                    gender_count += 1
+                    count += 1
+            current_accuracy = float(gender_count) / gender_total
+            print('%s accuracy: %.2f%%' % (str(current_gender), current_accuracy * 100))
     total_accuracy = float(count) / total
     print('Total accuracy: %.2f%%' % (total_accuracy * 100))
 
@@ -221,10 +250,10 @@ if __name__ == '__main__':
 
     test_file = 'input.wav'
     test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-    model_path = 'model/best_model_2.h5'
+    model_path = 'model/gender_model.h5'
     model = load_model(model_path)
 
-    test_model(model_path,test_folder)
+    test_model(model_path,test_folder,model_type='gender')
 
     # #获取音频
     # microphone_audio(test_file)

@@ -118,17 +118,23 @@ def find_max(list_iter):
 
 # test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
 def test_model(model_path, test_folder):
-    model_path = 'best_model.h5'
+
     model = load_model(model_path)
     emotion_list = os.listdir(test_folder)
     total = 0
     count = 0
     for current_emotion in emotion_list:
+        if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
+            continue
+
         emotion_total = 0
-        emotion_count = 1
+        emotion_count = 0
         current_emotion_path = test_folder + '/' + current_emotion
         test_file_list = os.listdir(current_emotion_path)
         for current_test_file in test_file_list:
+            if (current_test_file == '.DS_Store' or current_test_file == '_desktop.ini'):
+                continue
+
             test_file_path = current_emotion_path + '/' + current_test_file
             data, sr = get_data(test_file_path)
             f = extract_dataset_tosequence(data, sr)
@@ -192,7 +198,7 @@ if __name__ == '__main__':
 
     test_file = 'input.wav'
     test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-    model_path = 'model/best_model.h5'
+    model_path = 'model/best_model_2.h5'
     model = load_model(model_path)
 
     test_model(model_path,test_folder)

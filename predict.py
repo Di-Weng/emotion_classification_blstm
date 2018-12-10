@@ -45,6 +45,7 @@ from get_audio import microphone_audio
 # classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
 
 classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
+gender_classes = {0:'male',1:'female'}
 
 max_len = 1024
 nb_features = 36
@@ -170,24 +171,44 @@ def analyse_emotionn(model,test_file):
     print('因此，当前语音的情感为：%s, 概率为：%.2f%%' %
           (str(predict_class), predict_prob * 100))
 
-def get_audioclass(model,test_file,all = False):
-    data, sr = get_data(test_file)
-    f = extract_dataset_tosequence(data, sr)
-    f_ex = np.full((f.shape[0], nb_attention_param),
-                   attention_init_value, dtype=np.float32)
-    predict_output = model.predict([f_ex, f])
-    predict_prob, predict_label = find_max(predict_output)
-    predict_class = classes[predict_label]
-    class_dic = {}
-    for i in range(len(predict_output[0])):
-        current_prob = predict_output[0][i]
-        current_class = classes[i]
-        class_dic[current_class] = current_prob
-        print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
-              (str(current_class), current_prob * 100))
-    if(all):
-        return predict_class,predict_prob,class_dic
-    return predict_class,predict_prob
+def get_audioclass(model,test_file,model_type = 'emotion',all = False):
+    if(model_type == 'emotion'):
+        data, sr = get_data(test_file)
+        f = extract_dataset_tosequence(data, sr)
+        f_ex = np.full((f.shape[0], nb_attention_param),
+                       attention_init_value, dtype=np.float32)
+        predict_output = model.predict([f_ex, f])
+        predict_prob, predict_label = find_max(predict_output)
+        predict_class = classes[predict_label]
+        class_dic = {}
+        for i in range(len(predict_output[0])):
+            current_prob = predict_output[0][i]
+            current_class = classes[i]
+            class_dic[current_class] = current_prob
+            print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
+                  (str(current_class), current_prob * 100))
+        if(all):
+            return predict_class,predict_prob,class_dic
+        return predict_class,predict_prob
+    elif(model_type == 'gender'):
+        data, sr = get_data(test_file)
+        f = extract_dataset_tosequence(data, sr)
+        f_ex = np.full((f.shape[0], nb_attention_param),
+                       attention_init_value, dtype=np.float32)
+        predict_output = model.predict([f_ex, f])
+        predict_prob, predict_label = find_max(predict_output)
+        predict_class = gender_classes[predict_label]
+        class_dic = {}
+        for i in range(len(predict_output[0])):
+            current_prob = predict_output[0][i]
+            current_class = gender_classes[i]
+            class_dic[current_class] = current_prob
+            print('当前语音的情感为：%-8s 的概率为：%.2f%%' %
+                  (str(current_class), current_prob * 100))
+        if (all):
+            return predict_class, predict_prob, class_dic
+        return predict_class, predict_prob
+
 
 if __name__ == '__main__':
 

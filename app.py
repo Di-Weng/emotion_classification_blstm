@@ -6,7 +6,7 @@ from contextlib import closing
 import os
 import datetime
 import random
-import predict
+from predict import load_model,get_audioclass
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -19,6 +19,13 @@ PASSWORD = 'default'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+emotion_model_path = 'model/best_model.h5'
+
+# model trainning :)
+gender_model_path = ''
+
+emotion_model = load_model(emotion_model_path)
+gender_model = load_model(gender_model_path)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -94,10 +101,12 @@ def get_audio():
         filename="recordFiles/"+datetime.datetime.strftime(timenow,'%Y%m%d%H%M%S')+"_"+str(random.randint(1,10000))+".wav"
         request.files['audioData'].save(filename)
         # test_model(model_path,test_folder)
-        model_path = 'model/best_model.h5'
-        model = predict.load_model(model_path)
 
-        predict.analyse_emotionn(filename)#运行模型
+        # emotion class prediction
+        emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+
+        # gender prediction
+        gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
 
 
     return render_template('login.html')

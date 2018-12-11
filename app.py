@@ -53,8 +53,9 @@ def teardown_request(exception):
         db.close()
     g.db.close()
 @app.route('/')
+@app.route('/index')
 def show_index():
-    return render_template('layout.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
+    return render_template('index.html')
 
 # @app.route('/entries')
 # def show_entries():
@@ -111,9 +112,9 @@ def get_audio():
         # gender prediction
         # gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
         dic = analyse_emotionn(emotion_model,filename)
-        return redirect(url_for('layout.html',dic =dic))
+        return render_template('get_audio.html',dic = dic)
     else:
-        return render_template('layout.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
+        return render_template('get_audio.html',dic = {"angry":0,"sad":0,"surprise":0,"happy":0,"fear":0})
 
 
 if __name__ == '__main__':

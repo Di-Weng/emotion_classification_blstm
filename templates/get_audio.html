@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+	<div class="container">
+	<div class="heading text-center">
+	<!-- Heading -->
+	<h2>从这里开始在线分析吧！</h2>
+	</div>
+	<script src="../static/js/recorder.js"></script>
+	<p align="center">
+		<span style="white-space:pre"></span>
+		<audio controls autoplay></audio>
+	</p>
+	<p align="center">
+	<input type="button" value="开始录音" onclick="startRecording()"/>
+	<input type="button" value="停止录音" onclick="stopRecord()"/>
+	<input type="button" value="播放录音" onclick="playRecord()"/>
+	<input type="button" value="上传录音" onclick="uploadRecord()"/>
+	</p>
+	<script>
+		var recorder;
+		var audio = document.querySelector('audio');
+		function startRecording() {
+			HZRecorder.get(function (rec) {
+				recorder = rec;
+				recorder.start();
+			});
+		}
+
+		function obtainRecord(){
+			var record = recorder.getBlob();
+			debugger;
+		};
+
+		function stopRecord(){
+			recorder.stop();
+		};
+
+		function playRecord(){
+			recorder.play(audio);
+		};
+
+		function uploadRecord(){
+			// alert("开始上传");
+			// var url="{{ url_for('get_audio') }}";
+			// recorder.shangchuan(url,obtainRecord());
+			recorder.shangchuan("{{ url_for('get_audio') }}", function(state, e) {
+				switch (state) {
+					case 'uploading':
+						alert("上传中");
+						break;
+					case 'ok':
+						alert("上传成功");
+						break;
+					case 'error':
+						alert("上传失败");
+						break;
+					case 'cancel':
+						alert("上传被取消");
+						break;
+				}
+			});
+			// alert("上传结束");
+		};
+		function replace(){
+			location.reload()
+		};
+	</script>
+	<div class="row" id = "show">
+		<div class="col-sm-6">
+			<h2>Sentiment Predicted</h2>
+			<div class="row">
+				<div class="col-md-2 skilltitle">angry</div>
+				<div class="col-md-8">
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.angry}}%;">
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="row">
+				<div class="col-md-2 skilltitle">sad</div>
+				<div class="col-md-8">
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.sad}}%;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2 skilltitle">surprise</div>
+				<div class="col-md-8">
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.surprise}}%;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2 skilltitle">fear</div>
+				<div class="col-md-8">
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.fear}}%;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-2 skilltitle">happy</div>
+				<div class="col-md-8">
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.happy}}%;">
+						</div>
+					</div>
+				</div>
+			</div>            
+		</div>
+	</div>
+	</div>
+{% endblock %}

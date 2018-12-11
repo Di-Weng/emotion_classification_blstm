@@ -65,57 +65,24 @@
 			location.reload()
 		};
 	</script>
+
+    {% if display %}
 	<div class="row" id = "show">
 		<div class="col-sm-6">
 			<h2>Sentiment Predicted</h2>
+            {% for emoName in dic %}
 			<div class="row">
-				<div class="col-md-2 skilltitle">angry</div>
+				<div class="col-md-2 skilltitle">{{ emoName|title }}</div>
 				<div class="col-md-8">
 					<div class="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.angry}}%;">
+						<div class="progress-bar" role="progressbar" aria-valuenow="{{ dic[emoName]*100 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.angry}}%;">
 						</div>
 					</div>
 				</div>
 			</div>
+            {% endfor %}
 
-
-			<div class="row">
-				<div class="col-md-2 skilltitle">sad</div>
-				<div class="col-md-8">
-					<div class="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.sad}}%;">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-2 skilltitle">surprise</div>
-				<div class="col-md-8">
-					<div class="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.surprise}}%;">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-2 skilltitle">fear</div>
-				<div class="col-md-8">
-					<div class="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.fear}}%;">
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-2 skilltitle">happy</div>
-				<div class="col-md-8">
-					<div class="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.happy}}%;">
-						</div>
-					</div>
-				</div>
-			</div>            
-		</div>
 	</div>
-	</div>
+    </div>
+    {% endif %}
 {% endblock %}

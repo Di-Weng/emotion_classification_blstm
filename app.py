@@ -111,9 +111,9 @@ def get_audio():
         # gender prediction
         # gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
         dic = analyse_emotionn(emotion_model,filename)
-        return redirect(url_for('layout2.html',dic =dic))
+        return redirect(url_for('layout.html',dic =dic))
     else:
-        return render_template('layout2.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
+        return render_template('layout.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from contextlib import closing
 import os
 import datetime
 import random
-from predict import load_model,get_audioclass
+from predict import load_model,get_audioclass,analyse_emotionn
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -52,47 +52,50 @@ def teardown_request(exception):
     if db is not None:
         db.close()
     g.db.close()
-
 @app.route('/')
-def show_entries():
-    cur = g.db.execute('select title, text from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
+def show_index():
+    return render_template('layout.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
 
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
-    g.db.execute('insert into entries (title, text) values (?, ?)',
-                 [request.form['title'], request.form['text']])
-    g.db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+# @app.route('/entries')
+# def show_entries():
+#     cur = g.db.execute('select title, text from entries order by id desc')
+#     entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
+#     return render_template('show_entries.html', entries=entries)
+
+# @app.route('/add', methods=['POST'])
+# def add_entry():
+#     if not session.get('logged_in'):
+#         abort(401)
+#     g.db.execute('insert into entries (title, text) values (?, ?)',
+#                  [request.form['title'], request.form['text']])
+#     g.db.commit()
+#     flash('New entry was successfully posted')
+#     return redirect(url_for('show_entries'))
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     error = None
+#     if request.method == 'POST':
+#         if request.form['username'] != app.config['USERNAME']:
+#             error = 'Invalid username'
+#         elif request.form['password'] != app.config['PASSWORD']:
+#             error = 'Invalid password'
+#         else:
+#             session['logged_in'] = True
+#             flash('You were logged in')
+#             return redirect(url_for('show_entries'))
+#     return render_template('login.html', error=error)
 
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_entries'))
+# @app.route('/logout')
+# def logout():
+#     session.pop('logged_in', None)
+#     flash('You were logged out')
+#     return redirect(url_for('show_entries'))
 
-@app.route('/test')
-def test():
-    return render_template('test.html')
+# @app.route('/test')
+# def test():
+#     return render_template('test.html')
 
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
@@ -103,13 +106,14 @@ def get_audio():
         # test_model(model_path,test_folder)
 
         # emotion class prediction
-        emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+        # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
 
         # gender prediction
-        gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
-
-
-    return render_template('login.html')
+        # gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
+        dic = analyse_emotionn(emotion_model,filename)
+        return redirect(url_for('layout2.html',dic =dic))
+    else:
+        return render_template('layout2.html',dic = {"angry":0,"sad":0,"happy":0,"fear":0,"surprise":0})
 
 
 if __name__ == '__main__':

@@ -6,7 +6,6 @@ from contextlib import closing
 import os
 import datetime
 import random
-from flask import Markup
 from predict import load_model,get_audioclass,analyse_emotionn
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -108,13 +107,14 @@ def get_audio():
         # test_model(model_path,test_folder)
 
         # emotion class prediction
-        emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+        # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
 
         # gender prediction
         # gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
-        return render_template('get_audio.html',dic=emotion_class_dic,display=True)
+        dic = analyse_emotionn(emotion_model,filename)
+        return render_template('get_audio.html',dic = dic)
     else:
-        return render_template('get_audio.html',dic = {"angry":0,"sad":0,"surprise":0,"happy":0,"fear":0},display=False)
+        return render_template('get_audio.html',dic = {"angry":0,"sad":0,"surprise":0,"happy":0,"fear":0})
 
 
 if __name__ == '__main__':

@@ -110,59 +110,37 @@
         this.start = function () {
             audioInput.connect(recorder);
             recorder.connect(context.destination);
-        }
+        };
 
         //停止
         this.stop = function () {
             recorder.disconnect();
-        }
+        };
 
         //获取音频文件
         this.getBlob = function () {
             this.stop();
             return audioData.encodeWAV();
-        }
+        };
 
         //回放
         this.play = function (audio) {
             audio.src = window.URL.createObjectURL(this.getBlob());
-        }
+        };
 
-        //上传
-        this.shangchuan = function (url, callback) {
-            var fd = new FormData();
-            fd.append("audioData", this.getBlob());
-            var xhr = new XMLHttpRequest();
-            if (callback) {
-                xhr.upload.addEventListener("progress", function (e) {
-                    callback('uploading', e);
-                }, false);
-                xhr.addEventListener("load", function (e) {
-                    callback('ok', e);
-                }, false);
-                xhr.addEventListener("error", function (e) {
-                    callback('error', e);
-                }, false);
-                xhr.addEventListener("abort", function (e) {
-                    callback('cancel', e);
-                }, false);
-            }
-            xhr.open("POST", url);
-            xhr.send(fd);
-        }
 
         //音频采集
         recorder.onaudioprocess = function (e) {
             audioData.input(e.inputBuffer.getChannelData(0));
             //record(e.inputBuffer.getChannelData(0));
-        }
+        };
 
     };
     //抛出异常
     HZRecorder.throwError = function (message) {
         alert(message);
         throw new function () { this.toString = function () { return message; } }
-    }
+    };
     //是否支持录音
     HZRecorder.canRecording = (navigator.getUserMedia != null);
     //获取录音机

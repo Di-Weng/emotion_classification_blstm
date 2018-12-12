@@ -10,6 +10,7 @@ import random
 from predict import get_audioclass
 import numpy as np
 from flask import Markup
+import json
 from keras.models import load_model
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -128,20 +129,67 @@ def get_audio():
         request.files['audioData'].save(filename)
         # test_model(model_path,test_folder)
 
+        # # emotion prediction
+        # with sess1.as_default():
+        #     with sess1.graph.as_default():
+        #         emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+        #
+        # # gender prediction
+        # with sess2.as_default():
+        #     with sess2.graph.as_default():
+        #         gender_predict_class, gender_predict_prob = get_audioclass(gender_model,filename,'gender',all=False)
+        #         print(gender_predict_class)
+
+        emotion_class_dic = {}
+
+        return render_template('get_audio.html',dic = emotion_class_dic)
+    else:
+        return render_template('get_audio.html')
+
+@app.route('/get_class', methods=['GET', 'POST'])
+def get_class():
+    if request.method == 'POST':
+        timenow = datetime.datetime.now()
+        filename = "recordFiles/" + datetime.datetime.strftime(timenow, '%Y%m%d%H%M%S') + "_" + str(
+            random.randint(1, 10000)) + ".wav"
+        request.files['audioData'].save(filename)
+
         # emotion prediction
         with sess1.as_default():
             with sess1.graph.as_default():
-                emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+                emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model, filename,
+                                                                                                'emotion', all=True)
+
 
         # gender prediction
         with sess2.as_default():
             with sess2.graph.as_default():
-                gender_predict_class, gender_predict_prob = get_audioclass(gender_model,filename,'gender',all=False)
-                print(gender_predict_class)
-        return render_template('get_audio.html',dic=emotion_class_dic,display=True)
-    else:
-        return render_template('get_audio.html',dic = {"angry":0,"sad":0,"surprise":0,"happy":0,"fear":0},display=False)
+                gender_predict_class, gender_predict_prob = get_audioclass(gender_model, filename, 'gender', all=False)
 
+        jsonData = {}
+        emotion_class_list = []
+        emotion_prob_list = []
+        gender_class_list = []
+        gender_prob_list = []
+
+        print(emotion_class_dic)
+
+
+        for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
+            emotion_class_list.append(current_emotion_class)
+            emotion_prob_list.append(float(current_emotion_prob))
+
+        for current_gender_class, current_gender_prob in emotion_class_dic.items():
+            gender_class_list.append(current_gender_class)
+            gender_prob_list.append(float(current_gender_prob))
+
+        jsonData['emotion_class'] = emotion_class_list
+        jsonData['emotion_prob'] = emotion_prob_list
+        jsonData['gender_class'] = gender_class_list
+        jsonData['gender_prob'] = gender_prob_list
+        return_data = json.dumps(jsonData)
+        print(return_data)
+        return (return_data)
 
 if __name__ == '__main__':
     app.run()

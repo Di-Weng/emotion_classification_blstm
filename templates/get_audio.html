@@ -6,6 +6,8 @@
 	<h2>从这里开始在线分析吧！</h2>
 	</div>
 	<script src="../static/js/recorder.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
+
 	<p align="center">
 		<span style="white-space:pre"></span>
 		<audio controls autoplay></audio>
@@ -17,6 +19,38 @@
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
 	</p>
 	<script>
+		var class_data = {
+			emotion_class:[],
+			emotion_prob:[],
+			gender_class:[],
+			gender_prob:[],
+		};
+
+		var opts = {
+            //innerImage: {url: '../img/logo.png', width: 56, height: 56 }, //内部图片
+            lines: 10, // 花瓣数目
+            length: 10, // 花瓣长度
+            width: 10, // 花瓣宽度
+            radius: 20, // 花瓣距中心半径
+            corners: 1, // 花瓣圆滑度 (0-1)
+            rotate: 0, // 花瓣旋转角度
+            direction: 1, // 花瓣旋转方向 1: 顺时针, -1: 逆时针
+            color: '#000000', // 花瓣颜色
+            speed: 1, // 花瓣旋转速度
+            trail: 60, // 花瓣旋转时的拖影(百分比)
+            shadow: false, // 花瓣是否显示阴影
+            hwaccel: true, //spinner 是否启用硬件加速及高速旋转
+            className: 'spinner', // spinner css 样式名称
+            zIndex: 2e9, // spinner的z轴 (默认是2000000000)
+            top: '50px', // spinner 相对父容器Top定位 单位 px
+            left: '50%', // spinner 相对父容器Left定位 单位 px
+            position: 'relative', // element position
+            progress: true,      // show progress tracker
+            progressTop: 0,       // offset top for progress tracker
+            progressLeft: 0       // offset left for progress tracker
+        };
+        var spinner = new Spinner(opts);
+
 		var recorder;
 		var audio = document.querySelector('audio');
 		function startRecording() {
@@ -40,49 +74,52 @@
 		};
 
 		function uploadRecord(){
-			// alert("开始上传");
-			// var url="{{ url_for('get_audio') }}";
-			// recorder.shangchuan(url,obtainRecord());
-			recorder.shangchuan("{{ url_for('get_audio') }}", function(state, e) {
-				switch (state) {
-					case 'uploading':
-						alert("上传中");
-						break;
-					case 'ok':
-						alert("上传成功");
-						break;
-					case 'error':
-						alert("上传失败");
-						break;
-					case 'cancel':
-						alert("上传被取消");
-						break;
+			var target = document.getElementById('show');
+			spinner.spin(target);
+			var fd = new FormData();
+			fd.append("audioData", recorder.getBlob());
+			console.log(fd);
+			var xmlhttp;
+			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlhttp = new XMLHttpRequest();
+			}
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var data =  eval("("+xmlhttp.responseText+")") ;
+					class_data.emotion_class =  data.emotion_class;
+					class_data.emotion_prob = data.emotion_prob;
+					class_data.gender_class = data.gender_class;
+					class_data.gender_prob = data.gender_prob;
+
+					insert_html = '<div class="col-sm-6">\n' +
+							'\t\t\t<h2>Sentiment Predicted</h2>\n';
+					for (var i = 0; i < class_data.emotion_class.length; i++) {
+						console.log(class_data.emotion_class[i]);
+						insert_html += '\n\t\t\t<div class="row">\n' +
+					'\t\t\t\t<div class="col-md-2 skilltitle">' + class_data.emotion_class[i]+ ' </div>\n' +
+					'\t\t\t\t<div class="col-md-8">\n' +
+					'\t\t\t\t\t<div class="progress" lay-showPercent="yes">\n' +
+					'\t\t\t\t\t\t<div class="progress-bar" role="progressbar" aria-valuenow="' + class_data.emotion_prob[i]*100 +'" aria-valuemin="0" aria-valuemax="100" style="width:'+ class_data.emotion_prob[i]*100 +'%">\n' +
+					'\t\t\t\t\t\t</div>\n' +
+					'\t\t\t\t\t</div>\n' +
+					'\t\t\t\t</div>\n' +
+					'\t\t\t</div>\n'
+					}
+					insert_html += '\t\t</div>';
+					console.log(insert_html);
+					spinner.spin();
+					document.getElementById("show").innerHTML= insert_html
 				}
-			});
-			// alert("上传结束");
+			};
+			xmlhttp.open("POST","{{ url_for('get_class') }}",true);
+			xmlhttp.send(fd);
 		};
 		function replace(){
 			location.reload()
 		};
 	</script>
-
-    {% if display %}
 	<div class="row" id = "show">
-		<div class="col-sm-6">
-			<h2>Sentiment Predicted</h2>
-            {% for emoName,emoPos in dic.items() %}
-			<div class="row">
-				<div class="col-md-2 skilltitle">{{ emoName|title }}</div>
-				<div class="col-md-8">
-					<div class="progress" lay-showPercent="yes">
-						<div class="progress-bar" role="progressbar" aria-valuenow="{{ dic[emoName]*100 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.emoName * 100}}%;">
-						</div>
-					</div>
-				</div>
-			</div>
-            {% endfor %}
 
-	</div>
     </div>
-    {% endif %}
+	</div>
 {% endblock %}

@@ -58,6 +58,13 @@ def teardown_request(exception):
 def show_index():
     return render_template('index.html')
 
+@app.route('/show_demo')
+def show_demo():
+    return render_template('show_demo.html',dic =  {"angry":90,"sad":5,"surprise":3,"happy":2,"fear":1})
+
+
+
+
 # @app.route('/entries')
 # def show_entries():
 #     cur = g.db.execute('select title, text from entries order by id desc')

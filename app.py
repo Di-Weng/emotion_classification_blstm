@@ -123,27 +123,6 @@ def show_demo():
 
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
-    if request.method == 'POST':
-        timenow=datetime.datetime.now()
-        filename="recordFiles/"+datetime.datetime.strftime(timenow,'%Y%m%d%H%M%S')+"_"+str(random.randint(1,10000))+".wav"
-        request.files['audioData'].save(filename)
-        # test_model(model_path,test_folder)
-
-        # # emotion prediction
-        # with sess1.as_default():
-        #     with sess1.graph.as_default():
-        #         emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
-        #
-        # # gender prediction
-        # with sess2.as_default():
-        #     with sess2.graph.as_default():
-        #         gender_predict_class, gender_predict_prob = get_audioclass(gender_model,filename,'gender',all=False)
-        #         print(gender_predict_class)
-
-        emotion_class_dic = {}
-
-        return render_template('get_audio.html',dic = emotion_class_dic)
-    else:
         return render_template('get_audio.html')
 
 @app.route('/get_class', methods=['GET', 'POST'])

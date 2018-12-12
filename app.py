@@ -5,9 +5,12 @@ from flask import Flask, request, session, g, redirect, url_for, \
 from contextlib import closing
 import os
 import datetime
+import tensorflow as tf
 import random
+from predict import get_audioclass
+import numpy as np
 from flask import Markup
-from predict import load_model,get_audioclass,analyse_emotionn
+from keras.models import load_model
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -17,16 +20,25 @@ DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
+emotion_model_path = 'model/best_model.h5'
+gender_model_path = 'model/gender_model.h5'
+# 加载第一个模型
+g1 = tf.Graph() # 加载到Session 1的graph
+g2 = tf.Graph() # 加载到Session 2的graph
+
+sess1 = tf.Session(graph=g1) # Session1
+sess2 = tf.Session(graph=g2) # Session2
+with sess1.as_default():
+    with g1.as_default():
+        emotion_model = load_model(emotion_model_path)
+
+# 加载第二个模型
+with sess2.as_default():  # 1
+    with g2.as_default():
+        gender_model = load_model(gender_model_path)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-emotion_model_path = 'model/best_model_2.h5'
-
-# model trainning :)
-gender_model_path = 'model/gender_model.h5'
-
-emotion_model = load_model(emotion_model_path)
-gender_model = load_model(gender_model_path)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -106,6 +118,8 @@ def show_demo():
 # def test():
 #     return render_template('test.html')
 
+
+
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
     if request.method == 'POST':
@@ -114,11 +128,16 @@ def get_audio():
         request.files['audioData'].save(filename)
         # test_model(model_path,test_folder)
 
-        # emotion class prediction
-        emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
+        # emotion prediction
+        with sess1.as_default():
+            with sess1.graph.as_default():
+                emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,filename,'emotion',all=True)
 
         # gender prediction
-        # gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,filename,'gender',all=True)
+        with sess2.as_default():
+            with sess2.graph.as_default():
+                gender_predict_class, gender_predict_prob = get_audioclass(gender_model,filename,'gender',all=False)
+                print(gender_predict_class)
         return render_template('get_audio.html',dic=emotion_class_dic,display=True)
     else:
         return render_template('get_audio.html',dic = {"angry":0,"sad":0,"surprise":0,"happy":0,"fear":0},display=False)

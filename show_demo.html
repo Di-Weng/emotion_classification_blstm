@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+	<div class="heading text-center">
+	<!-- Heading -->
+	<h2>从这里开始在线分析吧！</h2>
+	</div>
+	<script src="../static/js/recorder.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
+	<div class="timeline" align="center">
+        {% for j in range(3) %}
+		<div class="container">
+			<div class="wthree-about-grids">
+				<div class="col-md-6 wthree-about-left" align="center">
+					<input type="file" id="file" onchange="getResults()">
+                    <audio id="audio_id" controls="controls">
+                        Your browser can't support HTML5 Audio</audio>
+                    <p align="center">
+                        <button onclick="getResults()">获取结果</button>
+                    </p>
+
+                <script>
+                function onInputFileChange() {
+   var file = document.getElementById('file').files[0];
+   var url = URL.createObjectURL(file);
+   console.log(url);
+   document.getElementById("audio_id").src = url;}
+		var class_data = {
+			emotion_class:[],
+			emotion_prob:[],
+			gender_class:[],
+			gender_prob:[],
+		};
+
+		var opts = {
+            //innerImage: {url: '../img/logo.png', width: 56, height: 56 }, //内部图片
+            lines: 10, // 花瓣数目
+            length: 10, // 花瓣长度
+            width: 10, // 花瓣宽度
+            radius: 20, // 花瓣距中心半径
+            corners: 1, // 花瓣圆滑度 (0-1)
+            rotate: 0, // 花瓣旋转角度
+            direction: 1, // 花瓣旋转方向 1: 顺时针, -1: 逆时针
+            color: '#000000', // 花瓣颜色
+            speed: 1, // 花瓣旋转速度
+            trail: 60, // 花瓣旋转时的拖影(百分比)
+            shadow: false, // 花瓣是否显示阴影
+            hwaccel: true, //spinner 是否启用硬件加速及高速旋转
+            className: 'spinner', // spinner css 样式名称
+            zIndex: 2e9, // spinner的z轴 (默认是2000000000)
+            top: '50px', // spinner 相对父容器Top定位 单位 px
+            left: '50%', // spinner 相对父容器Left定位 单位 px
+            position: 'relative', // element position
+            progress: true,      // show progress tracker
+            progressTop: 0,       // offset top for progress tracker
+            progressLeft: 0       // offset left for progress tracker
+        };
+        var spinner = new Spinner(opts);
+		var recorder;
+		var audio = document.querySelector('audio');
+
+		function getResults(){
+		    var file = document.getElementById('file').files[0];
+            var url = URL.createObjectURL(file);
+            console.log(url);
+            document.getElementById("audio_id").src = url;
+		    var target = document.getElementById('show');
+			spinner.spin(target);
+            var fd = new FormData();
+			fd.append("audioData", recorder.getBlob());
+			console.log(fd);
+			var xmlhttp;
+			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlhttp = new XMLHttpRequest();
+			}
+			xmlhttp.onreadystatechange = function () {
+				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+					var data =  eval("("+xmlhttp.responseText+")") ;
+					class_data.emotion_class =  data.emotion_class;
+					class_data.emotion_prob = data.emotion_prob;
+					class_data.gender_class = data.gender_class;
+					class_data.gender_prob = data.gender_prob;
+                    var sentence="";
+                    if(class_data.gender_prob[0]>=0){
+                        sentence+="小伙子，";//
+                    }
+                    else if(class_data.gender_prob[1]>=0.5){
+                        sentence+="小姑娘，";
+                    }
+                    if(class_data.emotion_prob[0]>=0.5){
+                        sentence+="";//angry
+                    }
+                    else if(class_data.emotion_prob[1]>=0.5){
+                        sentence+="";//fear
+                    }
+                    else if(class_data.emotion_prob[2]>=0.5){
+                        sentence+="";//happy
+                    }
+                    else if(class_data.emotion_prob[3]>=0.5){
+                        sentence+="";//neutral
+                    }
+                    else if(class_data.emotion_prob[4]>=0.5){
+                        sentence+="";//sad
+                    }
+                    else if(class_data.emotion_prob[5]>=0.5){
+                        sentence+="";//surprise
+                    }
+                    else {
+                        sentence+="";//none
+                         }
+
+					insert_html = '<div class="col-sm-6">\n' +
+							'\t\t\t<h2>Sentiment Predicted</h2>\n';
+					for (var i = 0; i < class_data.emotion_class.length; i++) {
+						console.log(class_data.emotion_class[i]);
+						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
+					'\t\t\t\t<div class="col-md-2 skilltitle">' + class_data.emotion_class[i]+ ' </div>\n' +
+					'\t\t\t\t<div class="col-md-8">\n' +
+					'\t\t\t\t\t<div class="progress" lay-showPercent="yes">\n' +
+					'\t\t\t\t\t\t<div class="progress-bar" role="progressbar" aria-valuenow="' + class_data.emotion_prob[i]*100 +'" aria-valuemin="0" aria-valuemax="100" style="width:'+ class_data.emotion_prob[i]*100 +'%">\n' +
+					'\t\t\t\t\t\t</div>\n' +
+					'\t\t\t\t\t</div>\n' +
+					'\t\t\t\t</div>\n' +
+					'\t\t\t</div>\n'
+					}
+					insert_html += '<h3 align="center">'+sentence+'</h3>'+'\t\t</div>';
+					console.log(insert_html);
+					spinner.spin();
+					document.getElementById("show").innerHTML= insert_html
+				}
+			};
+			xmlhttp.open("POST","{{ url_for('get_class',saved="1") }}",true);
+			xmlhttp.setRequestHeader("filename",url);
+			xmlhttp.setRequestHeader("userName","admin");
+			xmlhttp.send(fd);
+		};
+		function replace(){
+			location.reload()
+		};
+	</script>
+				</div>
+			</div>
+		</div>
+        {% endfor %}
+	</div>
+</div>
+{% endblock %}

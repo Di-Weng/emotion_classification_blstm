@@ -53,7 +53,16 @@
 
 		var recorder;
 		var audio = document.querySelector('audio');
+		var userName=prompt("请输入您的用户名：");
 		function startRecording() {
+            if(userName!=""){
+                alert(userName+",welcome to our world!(现已开始录音)");
+            }
+            else{
+                userName="admin";
+                alert(userName+",welcome to our world!(现已开始录音)");
+            }
+
 			HZRecorder.get(function (rec) {
 				recorder = rec;
 				recorder.start();
@@ -90,12 +99,40 @@
 					class_data.emotion_prob = data.emotion_prob;
 					class_data.gender_class = data.gender_class;
 					class_data.gender_prob = data.gender_prob;
+                    var sentence="";
+                    if(class_data.gender_prob[0]>=0){
+                        sentence+="小伙子，";//
+                    }
+                    else if(class_data.gender_prob[1]>=0.5){
+                        sentence+="小姑娘，";
+                    }
+                    if(class_data.emotion_prob[0]>=0.5){
+                        sentence+="";//angry
+                    }
+                    else if(class_data.emotion_prob[1]>=0.5){
+                        sentence+="";//fear
+                    }
+                    else if(class_data.emotion_prob[2]>=0.5){
+                        sentence+="";//happy
+                    }
+                    else if(class_data.emotion_prob[3]>=0.5){
+                        sentence+="";//neutral
+                    }
+                    else if(class_data.emotion_prob[4]>=0.5){
+                        sentence+="";//sad
+                    }
+                    else if(class_data.emotion_prob[5]>=0.5){
+                        sentence+="";//surprise
+                    }
+                    else {
+                        sentence+="";//none
+                         }
 
 					insert_html = '<div class="col-sm-6">\n' +
 							'\t\t\t<h2>Sentiment Predicted</h2>\n';
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);
-						insert_html += '\n\t\t\t<div class="row">\n' +
+						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
 					'\t\t\t\t<div class="col-md-2 skilltitle">' + class_data.emotion_class[i]+ ' </div>\n' +
 					'\t\t\t\t<div class="col-md-8">\n' +
 					'\t\t\t\t\t<div class="progress" lay-showPercent="yes">\n' +
@@ -105,13 +142,16 @@
 					'\t\t\t\t</div>\n' +
 					'\t\t\t</div>\n'
 					}
-					insert_html += '\t\t</div>';
+					insert_html += '<h3 align="center">'+sentence+'</h3>'+'\t\t</div>';
 					console.log(insert_html);
 					spinner.spin();
 					document.getElementById("show").innerHTML= insert_html
 				}
 			};
-			xmlhttp.open("POST","{{ url_for('get_class') }}",true);
+
+			xmlhttp.open("POST","{{ url_for('get_class',saved="0") }}",true);
+			xmlhttp.setRequestHeader("filename","default");
+			xmlhttp.setRequestHeader("userName",userName);
 			xmlhttp.send(fd);
 		};
 		function replace(){

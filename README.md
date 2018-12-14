@@ -30,8 +30,5 @@ predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all =
 
 ```
 
-## To do
-Train model with 5 emotions--strip out neutral.
-
 ## References
 https://github.com/RayanWang/Speech_emotion_recognition_BLSTM

@@ -12,6 +12,7 @@ import numpy as np
 from flask import Markup
 import json
 from keras.models import load_model
+from pyecharts import ThemeRiver
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -76,9 +77,15 @@ def show_demo():
     demoUrlList=["recordFiles/admin_20181213205501_1467.wav","recordFiles/20181213153634_6772.wav","recordFiles/20181213165727_3399.wav"]
     return render_template('show_demo.html',urlList=demoUrlList)
 
+
+
 @app.route('/emo_visual')
 def emo_visual():
-    return render_template('emo_visual.html',dic =  {"angry":90,"sad":5,"surprise":3,"happy":2,"fear":1})
+    data = [ ['2015/11/08', 10, 'angry'], ['2015/11/09', 15, 'angry'], ['2015/11/10', 35, 'angry'],['2015/11/08', 1, 'happy'], ['2015/11/09', 76, 'happy'], ['2015/11/10', 15, 'happy'],['2015/11/08', 1, 'surprise'], ['2015/11/09', 0, 'surprise'], ['2015/11/10', 20, 'surprise'],['2015/11/08', 0, 'sad'], ['2015/11/09', 5, 'sad'], ['2015/11/10', 0, 'sad'],['2015/11/08', 88, 'fear'], ['2015/11/09',4, 'fear'], ['2015/11/10', 30, 'fear'],]
+    myechart = ThemeRiver("主题河流图",width = 800,height = 500)
+    myechart.add(['angry', 'happy', 'surprise', 'sad', 'fear'], data, is_label_show=False,is_legend_show = True)
+    return render_template('emo_visual.html',myechart = myechart.render_embed(),script_list = myechart.get_js_dependencies(),host = "https://pyecharts.github.io/assets/js")
+    
 
 
 

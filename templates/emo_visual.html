@@ -1,43 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+{% for jsfile_name in script_list %}
+	<script src="{{host}}/{{jsfile_name }}.js"></script>
+{% endfor %}
 
-<div class="container">
-	<div class="heading text-center">
-	<!-- Heading -->
-	<h2>从这里开始在线分析吧！</h2>
-	</div>
-	<script src="../static/js/recorder.js"></script>
-	<div class="about">
-		<div class="container">
-			<div class="wthree-about-grids">
-			{% for i in range(3)%}
-				<div class="col-md-6 wthree-about-left" align="center">
-					<audio controls="controls" height="100" width="100" src="recordFiles/admin_20181213200525_9255.wav">您的浏览器不支持  标签。
-					</audio>
-				</div >
-				<div class="col-md-6 wthree-about-right">
-					<h3>Sentiment Predicted</h3>
-					<div class="skills-bar">
-						<div class="row">
-							<div class="col-md-8">
-								{% for emoName,emoPos in dic.items() %}
-								<div class="row">
-									<div class="col-md-2 skilltitle">{{ emoName}}</div>
-									<div class="col-md-8">
-										<div class="progress">
-											<div class="progress-bar" role="progressbar" aria-valuenow="{{ dic.emoName}}" aria-valuemin="0" aria-valuemax="100" style="width: {{dic.emoName}}%;">
-											</div>
-										</div>
-									</div>
-								</div>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
-				</div >
-			{% endfor %}
-			</div>
-		</div>
-	</div>
-</div>
+{{ myechart|safe }}
+
 {% endblock %}

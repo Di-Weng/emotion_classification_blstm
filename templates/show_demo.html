@@ -13,19 +13,22 @@
 		<div class="container">
 			<div class="wthree-about-grids">
 				<div class="col-md-6 wthree-about-left" align="center">
-					<input type="file" id="file" onchange="getResults()">
-                    <audio id="audio_id" controls="controls">
+					<input type="file" id="file_{{j}}" onchange="getResults({{j}})">
+                    <audio id="audio_id_{{j}}" controls="controls">
                         Your browser can't support HTML5 Audio</audio>
                     <p align="center">
-                        <button onclick="getResults()">获取结果</button>
+                        <button onclick="getResults({{j}})">获取结果</button>
                     </p>
-
-                <script>
-                function onInputFileChange() {
-   var file = document.getElementById('file').files[0];
+				</div>
+			</div>
+		</div>
+        {% endfor %}
+		<script>
+		function onInputFileChange(j) {
+   var file = document.getElementById('file_'+ j).files[0];
    var url = URL.createObjectURL(file);
    console.log(url);
-   document.getElementById("audio_id").src = url;}
+   document.getElementById("audio_id_"+ j).src = url;}
 		var class_data = {
 			emotion_class:[],
 			emotion_prob:[],
@@ -60,23 +63,25 @@
 		var recorder;
 		var audio = document.querySelector('audio');
 
-		function getResults(){
-		    var file = document.getElementById('file').files[0];
+		function getResults(j){
+		    var file = document.getElementById('file_'+ j).files[0];
             var url = URL.createObjectURL(file);
             console.log(url);
-            document.getElementById("audio_id").src = url;
+            document.getElementById("audio_id_"+ j).src = url;
 		    var target = document.getElementById('show');
 			spinner.spin(target);
             var fd = new FormData();
-			fd.append("audioData", recorder.getBlob());
-			console.log(fd);
+			fd.append("audioData", file);
 			var xmlhttp;
 			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 				xmlhttp = new XMLHttpRequest();
 			}
 			xmlhttp.onreadystatechange = function () {
 				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-					var data =  eval("("+xmlhttp.responseText+")") ;
+					console.log(xmlhttp.readyState);
+				    var data =  eval("("+xmlhttp.responseText+")") ;
+
+					// var data =  JSON.parse(xmlhttp.responseText) ;
 					class_data.emotion_class =  data.emotion_class;
 					class_data.emotion_prob = data.emotion_prob;
 					class_data.gender_class = data.gender_class;
@@ -134,12 +139,9 @@
 			xmlhttp.setRequestHeader("filename",url);
 			xmlhttp.setRequestHeader("userName","admin");
 			xmlhttp.send(fd);
-		};
+		}
 	</script>
-				</div>
-			</div>
-		</div>
-        {% endfor %}
 	</div>
 </div>
+<div class="row" id = "show">
 {% endblock %}

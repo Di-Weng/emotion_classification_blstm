@@ -39,6 +39,7 @@ with sess2.as_default():  # 1
     with g2.as_default():
         gender_model = load_model(gender_model_path)
 
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 
@@ -138,13 +139,14 @@ def get_audio():
 
 @app.route('/get_class/<string:saved>', methods=['GET', 'POST'])
 def get_class(saved):
-    if (saved == "0"):
+    if (saved == "0" or "1"):
         if request.method == 'POST':
             userName=request.headers["userName"]
             timenow = datetime.datetime.now()
             filename = "recordFiles/" + userName+"_"+datetime.datetime.strftime(timenow, '%Y%m%d%H%M%S') + "_" + str(
                 random.randint(1, 10000)) + ".wav"
-            request.files['audioData'].save(filename)
+            if(saved == "1"):
+                request.files['audioData'].save(filename)
             print(filename)
 
             # emotion prediction
@@ -157,7 +159,7 @@ def get_class(saved):
             # gender prediction
             with sess2.as_default():
                 with sess2.graph.as_default():
-                    gender_predict_class, gender_predict_prob = get_audioclass(gender_model, filename, 'gender', all=False)
+                    gender_predict_class, gender_predict_prob,gender_class_dic = get_audioclass(gender_model, filename, 'gender', all=True)
 
             jsonData = {}
             emotion_class_list = []
@@ -168,11 +170,12 @@ def get_class(saved):
             print(emotion_class_dic)
 
 
+
             for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
                 emotion_class_list.append(current_emotion_class)
                 emotion_prob_list.append(float(current_emotion_prob))
 
-            for current_gender_class, current_gender_prob in emotion_class_dic.items():
+            for current_gender_class, current_gender_prob in gender_class_dic.items():
                 gender_class_list.append(current_gender_class)
                 gender_prob_list.append(float(current_gender_prob))
 
@@ -183,38 +186,37 @@ def get_class(saved):
             return_data = json.dumps(jsonData)
             print(return_data)
             return (return_data)
-    else:
-        if(request.method=='GET'):
-            filename=request.headers["filename"]
-            with sess1.as_default():
-                with sess1.graph.as_default():
-                    emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,
-                                                                                                    filename,
-                                                                                                    'emotion', all=True)
-            # gender prediction
-            with sess2.as_default():
-                with sess2.graph.as_default():
-                    gender_predict_class, gender_predict_prob = get_audioclass(gender_model, filename, 'gender',
-                                                                               all=False)
-            jsonData = {}
-            emotion_class_list = []
-            emotion_prob_list = []
-            gender_class_list = []
-            gender_prob_list = []
-            print(emotion_class_dic)
-            for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
-                emotion_class_list.append(current_emotion_class)
-                emotion_prob_list.append(float(current_emotion_prob))
-            for current_gender_class, current_gender_prob in emotion_class_dic.items():
-                gender_class_list.append(current_gender_class)
-                gender_prob_list.append(float(current_gender_prob))
-            jsonData['emotion_class'] = emotion_class_list
-            jsonData['emotion_prob'] = emotion_prob_list
-            jsonData['gender_class'] = gender_class_list
-            jsonData['gender_prob'] = gender_prob_list
-            return_data = json.dumps(jsonData)
-            print(return_data)
-        return render_template('show_demo.html')
+    # else:
+    #     if(request.method=='GET'):
+    #         filename=request.headers["filename"]
+    #         with sess1.as_default():
+    #             with sess1.graph.as_default():
+    #                 emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,
+    #                                                                                                 filename,
+    #                                                                                                 'emotion', all=True)
+    #         # gender prediction
+    #         with sess2.as_default():
+    #             with sess2.graph.as_default():
+    #                 gender_predict_class, gender_predict_prob = get_audioclass(gender_model, filename, 'gender',
+    #                                                                            all=False)
+    #         jsonData = {}
+    #         emotion_class_list = []
+    #         emotion_prob_list = []
+    #         gender_class_list = []
+    #         gender_prob_list = []
+    #         print(emotion_class_dic)
+    #         for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
+    #             emotion_class_list.append(current_emotion_class)
+    #             emotion_prob_list.append(float(current_emotion_prob))
+    #         for current_gender_class, current_gender_prob in emotion_class_dic.items():
+    #             gender_class_list.append(current_gender_class)
+    #             gender_prob_list.append(float(current_gender_prob))
+    #         jsonData['emotion_class'] = emotion_class_list
+    #         jsonData['emotion_prob'] = emotion_prob_list
+    #         jsonData['gender_class'] = gender_class_list
+    #         jsonData['gender_prob'] = gender_prob_list
+    #         return_data = json.dumps(jsonData)
+    #         return(return_data)
 
 if __name__ == '__main__':
     app.run()

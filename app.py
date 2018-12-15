@@ -44,14 +44,25 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+    rv = sqlite3.connect(app.config['DATABASE'])
+    rv.row_factory = sqlite3.Row
+    return rv
 
 def init_db():
-    with closing(connect_db()) as db:
+    with app.app_context():
+        db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-#
+
+def get_db():
+    if not hasattr(g,'sqlite_db'):
+        g.sqlite_db = connect_db()
+    return g.sqlite_db
+
+def close_db(error):
+    if hasattr(g,'sqlite_db'):
+        g.sqlite_db.close()
 
 # @app.route('/')
 # def hello_world():
@@ -60,7 +71,14 @@ def init_db():
 
 @app.before_request
 def before_request():
+    init_db()
     g.db = connect_db()
+    data = [['admin','2015-11-08',1,2,2,1,40],['admin','2015-11-09',5,5,1,1,26],['admin','2015-11-10',6,1,1,2,10],
+            ['admin','2015-11-11',1,2,2,1,40],['admin','2015-11-12',2,2,2,2,20],['admin','2015-11-13',6,1,1,1,21],
+            ['admin','2015-11-14',5,5,1,1,35],['admin','2015-11-15',1,1,1,5,35],['admin','2015-11-16',1,1,5,2,10]]
+    for datum in data:
+        g.db.execute('insert into user_sentiment(userName, use_date, surprise,angry,sad,fear,happy) values (?, ?, ?, ?, ?, ?, ?)',datum)
+        g.db.commit()
 
 @app.teardown_request
 def teardown_request(exception):
@@ -68,6 +86,7 @@ def teardown_request(exception):
     if db is not None:
         db.close()
     g.db.close()
+
 @app.route('/')
 @app.route('/index')
 def show_index():
@@ -81,12 +100,9 @@ def show_demo():
 
 @app.route('/emo_visual')
 def emo_visual():
-    data = [ ['2015/11/08', 10, 'angry'], ['2015/11/09', 15, 'angry'], ['2015/11/10', 35, 'angry'],['2015/11/08', 1, 'happy'], ['2015/11/09', 76, 'happy'], ['2015/11/10', 15, 'happy'],['2015/11/08', 1, 'surprise'], ['2015/11/09', 0, 'surprise'], ['2015/11/10', 20, 'surprise'],['2015/11/08', 0, 'sad'], ['2015/11/09', 5, 'sad'], ['2015/11/10', 0, 'sad'],['2015/11/08', 88, 'fear'], ['2015/11/09',4, 'fear'], ['2015/11/10', 30, 'fear'],]
-    myechart = ThemeRiver("主题河流图",width = 800,height = 500)
-    myechart.add(['angry', 'happy', 'surprise', 'sad', 'fear'], data, is_label_show=False,is_legend_show = True)
-    return render_template('emo_visual.html',myechart = myechart.render_embed(),script_list = myechart.get_js_dependencies(),host = "https://pyecharts.github.io/assets/js")
-    
-
+    cur = g.db.execute('select userName, use_date, angry, sad, fear, happy,surprise from user_sentiment')
+    lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
+    return render_template('emo_visual.html',lis = lis)
 
 
 # @app.route('/entries')

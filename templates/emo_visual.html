@@ -1,9 +1,85 @@
 {% extends "base.html" %}
 {% block content %}
-{% for jsfile_name in script_list %}
-	<script src="{{host}}/{{jsfile_name }}.js"></script>
-{% endfor %}
+<h1>为了把下列内容到可见处</h1>
 
-{{ myechart|safe }}
+<div class="container" id="main" style="height: 90%"></div>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+    var user=prompt("请输入您的用户名：");
+    var list = '{{lis|tojson}}';
+    var obj = eval(list);
+    var data1 = new Array();
+    for(var i=0;i<obj.length;i++){
+        if(obj[i].userName == user){
+            data1.push([obj[i].use_date,obj[i].surprise,'surprise']);
+            data1.push([obj[i].use_date,obj[i].angry,'angry']);
+            data1.push([obj[i].use_date,obj[i].sad,'sad']);
+            data1.push([obj[i].use_date,obj[i].fear,'fear']);
+            data1.push([obj[i].use_date,obj[i].happy,'happy']);
+        }
+        }
+    var dom = document.getElementById("main");
+    var myChart = echarts.init(dom);
+    option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'line',
+                lineStyle: {
+                    color: 'rgba(0,0,0,0.2)',
+                    width: 1,
+                    type: 'solid'
+                }
+            }
+        },
+
+        legend: {
+            data: ['surprise','angry', 'sad', 'fear', 'happy'],
+        },
+
+        singleAxis: {
+            top: 50,
+            bottom: 50,
+            axisTick: {},
+            axisLabel: {},
+            type: 'time',
+            axisPointer: {
+                animation: true,
+                label: {
+                    show: true
+                }
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    type: 'dashed',
+                    opacity: 0.2
+                }
+            }
+        },
+
+        series: [
+            {
+                type: 'themeRiver',
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 20,
+                        shadowColor: 'rgba(0, 0, 0, 0.8)'
+                    }
+                },
+                data: data1
+            }
+        ]
+    };
+    myChart.setOption(option, true);
+</script>
 
 {% endblock %}

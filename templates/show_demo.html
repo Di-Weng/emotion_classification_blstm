@@ -8,21 +8,21 @@
 	</div>
 	<script src="../static/js/recorder.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
-	<div class="timeline" align="center">
+	<div align="center">
         {% for j in range(3) %}
 		<div class="container">
 			<div class="wthree-about-grids">
-				<div class="col-md-6 wthree-about-left" align="center">
+				<div align="center">
 					<input type="file" id="file_{{j}}" onchange="getResults({{j}})">
                     <audio id="audio_id_{{j}}" controls="controls">
                         Your browser can't support HTML5 Audio</audio>
-                    <p align="center">
-                        <button onclick="getResults({{j}})">获取结果</button>
-                    </p>
+{#                    <p align="center">#}
+{#                        <button onclick="getResults({{j}})">获取结果</button>#}
+{#                    </p>#}
 				</div>
 			</div>
 		</div>
-        {% endfor %}
+
 		<script>
 		function onInputFileChange(j) {
    var file = document.getElementById('file_'+ j).files[0];
@@ -115,8 +115,8 @@
                         sentence+="";//none
                          }
 
-					insert_html = '<div class="col-sm-6">\n' +
-							'\t\t\t<h2>Sentiment Predicted</h2>\n';
+					insert_html = '<div align="center">\n' +
+							'\t\t\t<h2>Sentiment Predicted——No.\n'+'</h2>\n';
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);
 						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
@@ -141,6 +141,7 @@
 			xmlhttp.send(fd);
 		}
 	</script>
+        {% endfor %}
 	</div>
 </div>
 <div class="row" id = "show">

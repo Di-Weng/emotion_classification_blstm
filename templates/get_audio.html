@@ -55,8 +55,9 @@
 		var audio = document.querySelector('audio');
 		var userName=prompt("请输入您的用户名：");
 		function startRecording() {
-            if(userName!=""){
-                alert(userName+",welcome to our world!(现已开始录音)");
+            if( userName!=""){
+                if(userName!=null){
+                alert(userName+",welcome to our world!(现已开始录音)");}
             }
             else{
                 userName="admin";
@@ -128,7 +129,7 @@
                         sentence+="";//none
                          }
 
-					insert_html = '<div class="col-sm-6">\n' +
+					insert_html = '<div>\n' +
 							'\t\t\t<h2>Sentiment Predicted</h2>\n';
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);

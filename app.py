@@ -13,6 +13,16 @@ from flask import Markup
 import json
 from keras.models import load_model
 from pyecharts import ThemeRiver
+from keras import backend as K
+# set GPU memory
+if('tensorflow' == K.backend()):
+    import tensorflow as tf
+    from keras.backend.tensorflow_backend import set_session
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 # configuration
@@ -24,21 +34,53 @@ USERNAME = 'admin'
 PASSWORD = 'default'
 emotion_model_path = 'model/best_model.h5'
 gender_model_path = 'model/gender_model.h5'
+emotion_neutral_model_prepath = 'model/emotion_neutral_model_'
+
 # 加载第一个模型
 g1 = tf.Graph() # 加载到Session 1的graph
 g2 = tf.Graph() # 加载到Session 2的graph
+g3 = tf.Graph() # 加载到Session 1的graph
+g4 = tf.Graph() # 加载到Session 2的graph
+g5 = tf.Graph() # 加载到Session 1的graph
+g6 = tf.Graph() # 加载到Session 2的graph
+g7 = tf.Graph() # 加载到Session 1的graph
 
 sess1 = tf.Session(graph=g1) # Session1
 sess2 = tf.Session(graph=g2) # Session2
+sess3 = tf.Session(graph=g3) # Session1
+sess4 = tf.Session(graph=g4) # Session2
+sess5 = tf.Session(graph=g5) # Session1
+sess6 = tf.Session(graph=g6) # Session2
+sess7 = tf.Session(graph=g7) # Session1
+
 with sess1.as_default():
     with g1.as_default():
         emotion_model = load_model(emotion_model_path)
 
 # 加载第二个模型
-with sess2.as_default():  # 1
+with sess2.as_default():
     with g2.as_default():
         gender_model = load_model(gender_model_path)
 
+with sess3.as_default():
+    with g3.as_default():
+        emotion_neutral_model_1 = load_model(emotion_neutral_model_prepath +'1.h5')
+
+with sess4.as_default():
+    with g4.as_default():
+        emotion_neutral_model_2 = load_model(emotion_neutral_model_prepath +'2.h5')
+
+with sess5.as_default():
+    with g5.as_default():
+        emotion_neutral_model_3 = load_model(emotion_neutral_model_prepath +'3.h5')
+
+with sess6.as_default():
+    with g6.as_default():
+        emotion_neutral_model_4 = load_model(emotion_neutral_model_prepath +'4.h5')
+
+with sess7.as_default():
+    with g7.as_default():
+        emotion_neutral_model_5 = load_model(emotion_neutral_model_prepath +'5.h5')
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -151,6 +193,55 @@ def emo_visual():
 @app.route('/get_audio', methods=['GET', 'POST'])
 def get_audio():
         return render_template('get_audio.html')
+def whether_emotional(file_name):
+    class_list = []
+    prob_list = []
+    emotion_count = 0
+    # 声音数据为emotional的概率
+    emotional_prob_list = []
+    neutral_count = 0
+    with sess3.as_default():
+        with g3.as_default():
+            class_prob,neutral_class = get_audioclass(emotion_neutral_model_1, file_name,'emotion_neutral')
+            class_list.append(neutral_class)
+            prob_list.append(class_prob)
+    with sess4.as_default():
+        with g4.as_default():
+            class_prob,neutral_class = get_audioclass(emotion_neutral_model_2, file_name,'emotion_neutral')
+            class_list.append(neutral_class)
+            prob_list.append(class_prob)
+
+    with sess5.as_default():
+        with g5.as_default():
+            class_prob,neutral_class = get_audioclass(emotion_neutral_model_3, file_name,'emotion_neutral')
+            class_list.append(neutral_class)
+            prob_list.append(class_prob)
+
+    with sess6.as_default():
+        with g6.as_default():
+            class_prob,neutral_class = get_audioclass(emotion_neutral_model_4, file_name,'emotion_neutral')
+            class_list.append(neutral_class)
+            prob_list.append(class_prob)
+
+    with sess7.as_default():
+        with g7.as_default():
+            class_prob,neutral_class = get_audioclass(emotion_neutral_model_5, file_name,'emotion_neutral')
+            class_list.append(neutral_class)
+            prob_list.append(class_prob)
+
+    for i in range(len(class_list)):
+        if(class_list[i]=='emotional'):
+            emotion_count += 1
+            emotional_prob_list.append(prob_list[i])
+        else:
+            neutral_count += 1
+            emotional_prob_list.append(1-float(prob_list[i]))
+
+    if(emotion_count > neutral_count):
+        return ('emotional', emotional_prob_list)
+    else:
+        return ('neutral', emotional_prob_list)
+
 
 @app.route('/get_class/<string:saved>', methods=['GET', 'POST'])
 def get_class(saved):
@@ -164,13 +255,20 @@ def get_class(saved):
             request.files['audioData'].save(filename)
             print(filename)
 
+            # list长度为5， 每个元素代表每个模型判断语音数据为emotional的概率
+            emotional_probility_list = []
+
+            # whether_emotional_str， emotional 或 neutral；前者为带情感， 后者为不带情感
+            whether_emotional_str,emotional_probility_list = whether_emotional(filename)
+
+            print(whether_emotional_str)
+            print(emotional_probility_list)
+
             # emotion prediction
             with sess1.as_default():
                 with sess1.graph.as_default():
                     emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model, filename,
                                                                                                     'emotion', all=True)
-
-
             # gender prediction
             with sess2.as_default():
                 with sess2.graph.as_default():

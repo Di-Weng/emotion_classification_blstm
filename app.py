@@ -75,8 +75,7 @@ def show_index():
 
 @app.route('/show_demo')
 def show_demo():
-    demoUrlList=["recordFiles/admin_20181213205501_1467.wav","recordFiles/20181213153634_6772.wav","recordFiles/20181213165727_3399.wav"]
-    return render_template('show_demo.html',urlList=demoUrlList)
+    return render_template('show_demo.html')
 
 
 
@@ -139,14 +138,14 @@ def get_audio():
 
 @app.route('/get_class/<string:saved>', methods=['GET', 'POST'])
 def get_class(saved):
-    if (saved == "0" or "1"):
+    if (saved == "0" or saved=="1"):
         if request.method == 'POST':
             userName=request.headers["userName"]
             timenow = datetime.datetime.now()
             filename = "recordFiles/" + userName+"_"+datetime.datetime.strftime(timenow, '%Y%m%d%H%M%S') + "_" + str(
                 random.randint(1, 10000)) + ".wav"
-            if(saved == "1"):
-                request.files['audioData'].save(filename)
+            # if(saved == "0"):
+            request.files['audioData'].save(filename)
             print(filename)
 
             # emotion prediction
@@ -187,7 +186,7 @@ def get_class(saved):
             print(return_data)
             return (return_data)
     # else:
-    #     if(request.method=='GET'):
+    #     if(request.method=='POST'):
     #         filename=request.headers["filename"]
     #         with sess1.as_default():
     #             with sess1.graph.as_default():

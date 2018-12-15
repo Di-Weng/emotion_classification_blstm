@@ -43,7 +43,7 @@ import os
 from get_audio import microphone_audio
 
 classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
-
+classes_e_n = {0: 'emotional', 1: 'neutral'}
 # classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
 gender_classes = {0:'male',1:'female'}
 
@@ -238,6 +238,16 @@ def get_audioclass(model,test_file,model_type = 'emotion',all = False):
         if (all):
             return predict_class, predict_prob, class_dic
         return predict_class, predict_prob
+    elif(model_type == 'emotion_neutral'):
+        data, sr = get_data(test_file)
+        f = extract_dataset_tosequence(data, sr)
+        f_ex = np.full((f.shape[0], nb_attention_param),
+                       attention_init_value, dtype=np.float32)
+        predict_output = model.predict([f_ex, f])
+        predict_prob, predict_label = find_max(predict_output)
+        predict_class = classes_e_n[predict_label]
+        return predict_prob,predict_class
+
 
 
 if __name__ == '__main__':

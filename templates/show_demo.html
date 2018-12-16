@@ -1,34 +1,43 @@
 {% extends "base.html" %}
-{% block content %}
+{% block head %}
 
-<div class="container">
-	<div class="heading text-center">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>demo</title>
+{% endblock %}
+{% block style %}
+<style type="text/css">
+    .boxes /*这是关键*/
+            {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .box
+            {
+                {#border: 1px solid #999;#}
+                border-radius: 10px;
+                flex: auto;/*这是关键*/
+                margin: 5px;
+                padding: 10px;
+                width: 100px;/*每个元素的初始化宽度,这是关键*/
+            }
+            .box1
+            {
+                flex:2;/*设置匹配元素所占宽度为平均值的2倍，如果不设置，所有栏等宽*/
+            }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="heading text-center">
 	<!-- Heading -->
 	<h2>从这里开始在线分析吧！</h2>
 	</div>
 	<script src="../static/js/recorder.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
-	<div align="center">
-        {% for j in range(3) %}
-		<div class="container">
-			<div class="wthree-about-grids">
-				<div align="center">
-					<input type="file" id="file_{{j}}" onchange="getResults({{j}})">
-                    <audio id="audio_id_{{j}}" controls="controls">
-                        Your browser can't support HTML5 Audio</audio>
-                    <p align="center">
-                        <button onclick="getResults({{j}})">获取结果</button>
-                    </p>
-				</div>
-			</div>
-		</div>
-
-		<script>
-		function onInputFileChange(j) {
-   var file = document.getElementById('file_'+ j).files[0];
-   var url = URL.createObjectURL(file);
-   console.log(url);
-   document.getElementById("audio_id_"+ j).src = url;}
+<script>
 		var class_data = {
 			emotion_class:[],
 			emotion_prob:[],
@@ -53,7 +62,7 @@
             className: 'spinner', // spinner css 样式名称
             zIndex: 2e9, // spinner的z轴 (默认是2000000000)
             top: '50px', // spinner 相对父容器Top定位 单位 px
-            left: '50%', // spinner 相对父容器Left定位 单位 px
+            {#left: '15%', // spinner 相对父容器Left定位 单位 px#}
             position: 'relative', // element position
             progress: true,      // show progress tracker
             progressTop: 0,       // offset top for progress tracker
@@ -64,11 +73,11 @@
 		var audio = document.querySelector('audio');
 
 		function getResults(j){
-		    var file = document.getElementById('file_'+ j).files[0];
+		    var file = document.getElementById('file_'+j).files[0];
             var url = URL.createObjectURL(file);
             console.log(url);
-            document.getElementById("audio_id_"+ j).src = url;
-		    var target = document.getElementById('show');
+            document.getElementById("audio_id_"+j).src = url;
+		    var target = document.getElementById('show_'+j);
 			spinner.spin(target);
             var fd = new FormData();
 			fd.append("audioData", file);
@@ -94,29 +103,29 @@
                         sentence+="小姑娘，";
                     }
                     if(class_data.emotion_prob[0]>=0.5){
-                        sentence+="";//angry
+                        sentence+="莫生气莫生气，人间不值得";//angry
                     }
                     else if(class_data.emotion_prob[1]>=0.5){
-                        sentence+="";//fear
+                        sentence+="怕什么，信息系统开发实验课都要结课了";//fear
                     }
                     else if(class_data.emotion_prob[2]>=0.5){
-                        sentence+="";//happy
+                        sentence+="是你飘了还是我举不动刀了→_→";//happy
                     }
                     else if(class_data.emotion_prob[3]>=0.5){
-                        sentence+="";//neutral
+                        sentence+="你的内心毫无波澜而且...还是毫无波澜";//neutral
                     }
                     else if(class_data.emotion_prob[4]>=0.5){
-                        sentence+="";//sad
+                        sentence+="怎么？flask写不出来了？";//sad
                     }
                     else if(class_data.emotion_prob[5]>=0.5){
-                        sentence+="";//surprise
+                        sentence+="这么惊讶的吗？看来还是本机器见过的世面多啊哈哈";//surprise
                     }
                     else {
-                        sentence+="";//none
+                        sentence+="本机器无法识别您，请问您真的来自地球吗？";//none
                          }
 
 					insert_html = '<div align="center">\n' +
-							'\t\t\t<h2>Sentiment Predicted——No.\n'+'</h2>\n';
+							'\t\t\t<h3>Sentiment Predicted\n'+'</h3>\n';
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);
 						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
@@ -125,14 +134,15 @@
 					'\t\t\t\t\t<div class="progress" lay-showPercent="yes">\n' +
 					'\t\t\t\t\t\t<div class="progress-bar" role="progressbar" aria-valuenow="' + class_data.emotion_prob[i]*100 +'" aria-valuemin="0" aria-valuemax="100" style="width:'+ class_data.emotion_prob[i]*100 +'%">\n' +
 					'\t\t\t\t\t\t</div>\n' +
+                    '\t\t\t\t\t\t<div align="right">'+(class_data.emotion_prob[i]*100).toFixed(2)+'%</div>\n'+
 					'\t\t\t\t\t</div>\n' +
 					'\t\t\t\t</div>\n' +
 					'\t\t\t</div>\n'
 					}
-					insert_html += '<h3 align="center">'+sentence+'</h3>'+'\t\t</div>';
+					insert_html += '<h4 align="center">'+sentence+'</h4>'+'\t\t</div>';
 					console.log(insert_html);
 					spinner.spin();
-					document.getElementById("show").innerHTML= insert_html
+					document.getElementById("show_"+j).innerHTML= insert_html
 				}
 			};
 			xmlhttp.open("POST","{{ url_for('get_class',saved="1") }}",true);
@@ -141,8 +151,18 @@
 			xmlhttp.send(fd);
 		}
 	</script>
-        {% endfor %}
-	</div>
-</div>
-<div class="row" id = "show">
+    <div class="boxes">
+    {% for j in range(3) %}
+            <div class="box box1">
+                <div class="container" align="center">
+					<input type="file" id="file_{{ j }}" onchange="getResults({{ j }})">
+                    <audio id="audio_id_{{ j }}" controls="controls">
+                        Your browser can't support HTML5 Audio</audio>
+                    <div id = "show_{{ j }}" align="left"></div>
+                </div>
+
+            </div>
+
+{% endfor %}
+        </div>
 {% endblock %}

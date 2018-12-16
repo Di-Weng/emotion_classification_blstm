@@ -8,6 +8,7 @@
 	<script src="../static/js/recorder.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.js"></script>
 
+
 	<p align="center">
 		<span style="white-space:pre"></span>
 		<audio controls autoplay></audio>
@@ -17,7 +18,14 @@
 	<input type="button" value="停止录音" onclick="stopRecord()"/>
 	<input type="button" value="播放录音" onclick="playRecord()"/>
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
+
 	</p>
+{#        <div class="col-md-2 skilltitle">HTML5</div>#}
+{#                        <div class="col-md-8">#}
+{#                            <div class="progress">#}
+{#                                <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 90%;">#}
+{#                                </div>#}
+{#                                <div>90%</div>#}
 	<script>
 		var class_data = {
 			emotion_class:[],
@@ -108,37 +116,37 @@
                         sentence+="小姑娘，";
                     }
                     if(class_data.emotion_prob[0]>=0.5){
-                        sentence+="";//angry
+                        sentence+="莫生气莫生气，人间不值得";//angry
                     }
                     else if(class_data.emotion_prob[1]>=0.5){
-                        sentence+="";//fear
+                        sentence+="怕什么，信息系统开发实验课都要结课了";//fear
                     }
                     else if(class_data.emotion_prob[2]>=0.5){
-                        sentence+="";//happy
+                        sentence+="是你飘了还是我举不动刀了→_→";//happy
                     }
                     else if(class_data.emotion_prob[3]>=0.5){
-                        sentence+="";//neutral
+                        sentence+="你的内心毫无波澜而且...还是毫无波澜";//neutral
                     }
                     else if(class_data.emotion_prob[4]>=0.5){
-                        sentence+="";//sad
+                        sentence+="怎么？flask写不出来了？";//sad
                     }
                     else if(class_data.emotion_prob[5]>=0.5){
-                        sentence+="";//surprise
+                        sentence+="这么惊讶的吗？看来还是本机器见过的世面多啊哈哈";//surprise
                     }
                     else {
-                        sentence+="";//none
+                        sentence+="本机器无法识别您，请问您真的来自地球吗？";//none
                          }
-
-					insert_html = '<div>\n' +
-							'\t\t\t<h2>Sentiment Predicted</h2>\n';
+					insert_html = '<div align="center">\n' +
+							'\t\t\t<h3>Sentiment Predicted</h3>\n';
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);
 						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
 					'\t\t\t\t<div class="col-md-2 skilltitle">' + class_data.emotion_class[i]+ ' </div>\n' +
 					'\t\t\t\t<div class="col-md-8">\n' +
 					'\t\t\t\t\t<div class="progress" lay-showPercent="yes">\n' +
-					'\t\t\t\t\t\t<div class="progress-bar" role="progressbar" aria-valuenow="' + class_data.emotion_prob[i]*100 +'" aria-valuemin="0" aria-valuemax="100" style="width:'+ class_data.emotion_prob[i]*100 +'%">\n' +
+					'\t\t\t\t\t\t<div class="progress-bar" role="progressbar" aria-valuenow="' + class_data.emotion_prob[i]*100 +'" aria-valuemin="0" aria-valuemax="100" style="width:'+ class_data.emotion_prob[i]*100 +'%">\n'+
 					'\t\t\t\t\t\t</div>\n' +
+                    '\t\t\t\t\t\t<div align="right">'+(class_data.emotion_prob[i]*100).toFixed(2)+'%</div>\n'+
 					'\t\t\t\t\t</div>\n' +
 					'\t\t\t\t</div>\n' +
 					'\t\t\t</div>\n'

@@ -113,14 +113,8 @@ def close_db(error):
 
 @app.before_request
 def before_request():
-    init_db()
+    # init_db()
     g.db = connect_db()
-    data = [['admin','2015-11-08',1,2,2,1,40],['admin','2015-11-09',5,5,1,1,26],['admin','2015-11-10',6,1,1,2,10],
-            ['admin','2015-11-11',1,2,2,1,40],['admin','2015-11-12',2,2,2,2,20],['admin','2015-11-13',6,1,1,1,21],
-            ['admin','2015-11-14',5,5,1,1,35],['admin','2015-11-15',1,1,1,5,35],['admin','2015-11-16',1,1,5,2,10]]
-    for datum in data:
-        g.db.execute('insert into user_sentiment(userName, use_date, surprise,angry,sad,fear,happy) values (?, ?, ?, ?, ?, ?, ?)',datum)
-        g.db.commit()
 
 @app.teardown_request
 def teardown_request(exception):
@@ -144,50 +138,8 @@ def show_demo():
 def emo_visual():
     cur = g.db.execute('select userName, use_date, angry, sad, fear, happy,surprise from user_sentiment')
     lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
+    print(lis)
     return render_template('emo_visual.html',lis = lis)
-
-
-# @app.route('/entries')
-# def show_entries():
-#     cur = g.db.execute('select title, text from entries order by id desc')
-#     entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
-#     return render_template('show_entries.html', entries=entries)
-
-# @app.route('/add', methods=['POST'])
-# def add_entry():
-#     if not session.get('logged_in'):
-#         abort(401)
-#     g.db.execute('insert into entries (title, text) values (?, ?)',
-#                  [request.form['title'], request.form['text']])
-#     g.db.commit()
-#     flash('New entry was successfully posted')
-#     return redirect(url_for('show_entries'))
-
-
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     error = None
-#     if request.method == 'POST':
-#         if request.form['username'] != app.config['USERNAME']:
-#             error = 'Invalid username'
-#         elif request.form['password'] != app.config['PASSWORD']:
-#             error = 'Invalid password'
-#         else:
-#             session['logged_in'] = True
-#             flash('You were logged in')
-#             return redirect(url_for('show_entries'))
-#     return render_template('login.html', error=error)
-
-# @app.route('/logout')
-# def logout():
-#     session.pop('logged_in', None)
-#     flash('You were logged out')
-#     return redirect(url_for('show_entries'))
-
-# @app.route('/test')
-# def test():
-#     return render_template('test.html')
-
 
 
 @app.route('/get_audio', methods=['GET', 'POST'])
@@ -260,9 +212,9 @@ def get_class(saved):
 
             # whether_emotional_str， emotional 或 neutral；前者为带情感， 后者为不带情感
             whether_emotional_str,emotional_probility_list = whether_emotional(filename)
-
-            print(whether_emotional_str)
-            print(emotional_probility_list)
+            #
+            # print(whether_emotional_str)
+            # print(emotional_probility_list)
 
             # emotion prediction
             with sess1.as_default():
@@ -280,13 +232,30 @@ def get_class(saved):
             gender_class_list = []
             gender_prob_list = []
 
-            print(emotion_class_dic)
+            # print(emotion_class_dic)
 
 
 
             for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
                 emotion_class_list.append(current_emotion_class)
                 emotion_prob_list.append(float(current_emotion_prob))
+
+            if(saved=="0"):
+                timeItem=str(datetime.datetime.strftime(timenow, '%Y-%m-%d %H:%M:%S'))
+                selfEmo = [userName, str(timeItem)]
+                for item in emotion_class_dic:
+                    if(item!='neutral'):
+                        selfEmo.append(emotion_class_dic[item]*100)
+                # print(selfEmo)
+                g.db.execute(
+                        'insert into user_sentiment(userName, use_date, angry,fear,happy,sad,surprise) values (?, ?, ?, ?, ?, ?, ?)',
+                        selfEmo)
+                g.db.commit()
+
+                cur = g.db.execute('select * from user_sentiment')
+                lis = [dict(userName=row['userName'], use_date=row['use_date'], angry=row['angry'], sad=row['sad'],
+                            fear=row['fear'], happy=row['happy'], surprise=row['surprise']) for row in cur.fetchall()]
+                print(lis)
 
             for current_gender_class, current_gender_prob in gender_class_dic.items():
                 gender_class_list.append(current_gender_class)
@@ -297,39 +266,8 @@ def get_class(saved):
             jsonData['gender_class'] = gender_class_list
             jsonData['gender_prob'] = gender_prob_list
             return_data = json.dumps(jsonData)
-            print(return_data)
+            # print(return_data)
             return (return_data)
-    # else:
-    #     if(request.method=='POST'):
-    #         filename=request.headers["filename"]
-    #         with sess1.as_default():
-    #             with sess1.graph.as_default():
-    #                 emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model,
-    #                                                                                                 filename,
-    #                                                                                                 'emotion', all=True)
-    #         # gender prediction
-    #         with sess2.as_default():
-    #             with sess2.graph.as_default():
-    #                 gender_predict_class, gender_predict_prob = get_audioclass(gender_model, filename, 'gender',
-    #                                                                            all=False)
-    #         jsonData = {}
-    #         emotion_class_list = []
-    #         emotion_prob_list = []
-    #         gender_class_list = []
-    #         gender_prob_list = []
-    #         print(emotion_class_dic)
-    #         for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
-    #             emotion_class_list.append(current_emotion_class)
-    #             emotion_prob_list.append(float(current_emotion_prob))
-    #         for current_gender_class, current_gender_prob in emotion_class_dic.items():
-    #             gender_class_list.append(current_gender_class)
-    #             gender_prob_list.append(float(current_gender_prob))
-    #         jsonData['emotion_class'] = emotion_class_list
-    #         jsonData['emotion_prob'] = emotion_prob_list
-    #         jsonData['gender_class'] = gender_class_list
-    #         jsonData['gender_prob'] = gender_prob_list
-    #         return_data = json.dumps(jsonData)
-    #         return(return_data)
 
 if __name__ == '__main__':
     app.run()

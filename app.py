@@ -133,21 +133,21 @@ def show_index():
 def show_demo():
     return render_template('show_demo.html')
 
-def conn_mongo(ServerURL = '127.0.0.1',collection = 'user_time_emotion_1'):
+def conn_mongo(ServerURL = '127.0.0.1',db_name = 'user_sentiment', collection_name = 'user_emotion_1'):
     conn = pymongo.MongoClient(ServerURL,
                                27017,
                                username='user_sentiment',
                                password='u_s_2333',
                                )
-    db = conn[collection]
-    return db
+    db = conn[db_name]
+    return db[collection_name]
 
 
 
 @app.route('/emo_visual')
 def emo_visual():
     # cur = g.db.execute('select userName, use_date, angry, sad, fear, happy,surprise from user_sentiment')
-    current_collection = conn_mongo('127.0.0.1', 'user_time_emotion_1')
+    current_collection = conn_mongo('127.0.0.1')
     # lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
     lis = [dict(userName = current_data['userName'],use_date=current_data['use_date'],angry = current_data['angry'],sad = current_data['sad'],fear = current_data['fear'],happy = current_data['happy'],surprise = current_data['surprise']) for current_data in current_collection.find()]
     print(lis)
@@ -263,7 +263,7 @@ def get_class(saved):
                         selfEmo.append(emotion_class_dic[item]*100)
                         data_mongo[item] = emotion_class_dic[item]*100
 
-                current_collection = conn_mongo('127.0.0.1', 'user_time_emotion_1')
+                current_collection = conn_mongo('127.0.0.1')
                 result = current_collection.insert_one(data_mongo)
                 print(result.inserted_ids)
 

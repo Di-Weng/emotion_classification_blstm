@@ -134,14 +134,16 @@ def show_index():
 @app.route('/show_demo')
 def show_demo():
     return render_template('show_demo.html')
-
-def conn_mongo(ServerURL = '127.0.0.1',db_name = 'user_sentiment'):
+#127.0.0.1
+#127.0.0.1
+def conn_mongo(ServerURL = '192.168.12.120',db_name = 'user_sentiment'):
     conn = pymongo.MongoClient(ServerURL,
                                27017,
                                username='wd',
                                password='wd123456',
                                )
     db = conn[db_name]
+    print(ServerURL)
     return db,conn
 
 
@@ -230,58 +232,66 @@ def get_class(saved):
 
             # whether_emotional_str， emotional 或 neutral；前者为带情感， 后者为不带情感
             whether_emotional_str,emotional_probility_list = whether_emotional(filename)
-            #
-            # print(whether_emotional_str)
-            # print(emotional_probility_list)
-
-            # emotion prediction
-            with sess1.as_default():
-                with sess1.graph.as_default():
-                    emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(emotion_model, filename,
-                                                                                                    'emotion', all=True)
+            print(whether_emotional_str)
+            print(emotional_probility_list)
+            emoFlag=0
+            for emoItem in emotional_probility_list:
+                if(emoItem>0.5):
+                    emoFlag=1
+                    break
             # gender prediction
             with sess2.as_default():
                 with sess2.graph.as_default():
-                    gender_predict_class, gender_predict_prob,gender_class_dic = get_audioclass(gender_model, filename, 'gender', all=True)
-
+                    gender_predict_class, gender_predict_prob, gender_class_dic = get_audioclass(gender_model,
+                                                                                                 filename,
+                                                                                                 'gender',
+                                                                                                 all=True)
             jsonData = {}
             emotion_class_list = []
             emotion_prob_list = []
             gender_class_list = []
             gender_prob_list = []
 
-            # print(emotion_class_dic)
-
+            for current_gender_class, current_gender_prob in gender_class_dic.items():
+                gender_class_list.append(current_gender_class)
+                gender_prob_list.append(float(current_gender_prob))
             current_db, current_conn = conn_mongo()
-            for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
-                emotion_class_list.append(current_emotion_class)
-                emotion_prob_list.append(float(current_emotion_prob))
+            # emotion prediction
+            if(emoFlag==1):
+                with sess1.as_default():
+                    with sess1.graph.as_default():
+                        emotion_predict_class, emotion_predict_prob,emotion_class_dic  = get_audioclass(emotion_model, filename,
+                                                                                                        'emotion', all=True)
+
+
+                for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
+                    emotion_class_list.append(current_emotion_class)
+                    emotion_prob_list.append(float(current_emotion_prob))
+            else:
+                emotion_class_list=['angry','fear','happy','neutral','sad','surprise']
+                emotion_prob_list=[0,0,0,1,0,0]
+                emotion_class_dic={}
+                for i in range(6):
+                    emotion_class_dic[emotion_class_list[i]]=emotion_prob_list[i]
+
+
+
 
             if(saved=="0"):
                 timeItem=str(datetime.datetime.strftime(timenow, '%Y-%m-%d %H:%M:%S'))
                 data_mongo = {'userName':userName,'use_date':timeItem}
-                selfEmo = [userName, str(timeItem)]
+                # selfEmo = [userName, str(timeItem)]
                 for item in emotion_class_dic:
                     if(item!='neutral'):
-                        selfEmo.append(emotion_class_dic[item]*100)
+                        # selfEmo.append(emotion_class_dic[item]*100)
                         data_mongo[item] = emotion_class_dic[item]*100
+                        # print(selfEmo)
+                        print(data_mongo)
 
 
                 current_collection = current_db[collection_name]
-
                 result = current_collection.insert_one(data_mongo)
                 print(result)
-
-                # # print(selfEmo)
-                # g.db.execute(
-                #         'insert into user_sentiment(userName, use_date, angry,fear,happy,sad,surprise) values (?, ?, ?, ?, ?, ?, ?)',
-                #         selfEmo)
-                # g.db.commit()
-
-                # cur = g.db.execute('select * from user_sentiment')
-                # lis = [dict(userName=row['userName'], use_date=row['use_date'], angry=row['angry'], sad=row['sad'],
-                #             fear=row['fear'], happy=row['happy'], surprise=row['surprise']) for row in cur.fetchall()]
-                # print(lis)
 
                 lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
                             angry=current_data['angry'], sad=current_data['sad'], fear=current_data['fear'],
@@ -289,9 +299,7 @@ def get_class(saved):
                        current_collection.find()]
                 print(lis)
 
-            for current_gender_class, current_gender_prob in gender_class_dic.items():
-                gender_class_list.append(current_gender_class)
-                gender_prob_list.append(float(current_gender_prob))
+
 
             jsonData['emotion_class'] = emotion_class_list
             jsonData['emotion_prob'] = emotion_prob_list
@@ -299,11 +307,10 @@ def get_class(saved):
             jsonData['gender_prob'] = gender_prob_list
             return_data = json.dumps(jsonData)
             current_conn.close()
-            # print(return_data)
             return (return_data)
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=9593, ssl_context=('/Users/diweng/test/server.crt', '/Users/diweng/test/server.key'))
     context = ('/Users/diweng/test/server.crt','/Users/diweng/test/server.key')
-    # app.run(host='0.0.0.0', port=9593)
-    app.run(host='0.0.0.0', port=9593,ssl_context=context)
+    app.run(host='0.0.0.0', port=9593)
+    # app.run(host='0.0.0.0', port=9593,ssl_context=context)

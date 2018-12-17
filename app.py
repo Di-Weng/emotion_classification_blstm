@@ -15,6 +15,7 @@ from keras.models import load_model
 import pymongo
 from pyecharts import ThemeRiver
 from keras import backend as K
+from OpenSSL import SSL
 # set GPU memory
 if('tensorflow' == K.backend()):
     import tensorflow as tf
@@ -30,12 +31,13 @@ if('tensorflow' == K.backend()):
 
 DATABASE = 'flaskr.db'
 DEBUG = True
-SECRET_KEY = 'development key'
+SECRET_KEY = 'developmentkey'
 USERNAME = 'admin'
 PASSWORD = 'default'
 emotion_model_path = 'model/best_model.h5'
 gender_model_path = 'model/gender_model.h5'
 emotion_neutral_model_prepath = 'model/emotion_neutral_model_'
+collection_name = 'user_emotion_1'
 
 # 加载第一个模型
 g1 = tf.Graph() # 加载到Session 1的graph
@@ -133,24 +135,26 @@ def show_index():
 def show_demo():
     return render_template('show_demo.html')
 
-def conn_mongo(ServerURL = '127.0.0.1',db_name = 'user_sentiment', collection_name = 'user_emotion_1'):
+def conn_mongo(ServerURL = '127.0.0.1',db_name = 'user_sentiment'):
     conn = pymongo.MongoClient(ServerURL,
                                27017,
-                               username='user_sentiment',
-                               password='u_s_2333',
+                               username='wd',
+                               password='wd123456',
                                )
     db = conn[db_name]
-    return db[collection_name]
+    return db,conn
 
 
 
 @app.route('/emo_visual')
 def emo_visual():
     # cur = g.db.execute('select userName, use_date, angry, sad, fear, happy,surprise from user_sentiment')
-    current_collection = conn_mongo('127.0.0.1')
+    current_db,current_conn = conn_mongo()
+    current_collection = current_db[collection_name]
     # lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
     lis = [dict(userName = current_data['userName'],use_date=current_data['use_date'],angry = current_data['angry'],sad = current_data['sad'],fear = current_data['fear'],happy = current_data['happy'],surprise = current_data['surprise']) for current_data in current_collection.find()]
     print(lis)
+    current_conn.close()
     return render_template('emo_visual.html',lis = lis)
 
 
@@ -248,8 +252,7 @@ def get_class(saved):
 
             # print(emotion_class_dic)
 
-
-
+            current_db, current_conn = conn_mongo()
             for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
                 emotion_class_list.append(current_emotion_class)
                 emotion_prob_list.append(float(current_emotion_prob))
@@ -263,9 +266,11 @@ def get_class(saved):
                         selfEmo.append(emotion_class_dic[item]*100)
                         data_mongo[item] = emotion_class_dic[item]*100
 
-                current_collection = conn_mongo('127.0.0.1')
+
+                current_collection = current_db[collection_name]
+
                 result = current_collection.insert_one(data_mongo)
-                print(result.inserted_ids)
+                print(result)
 
                 # # print(selfEmo)
                 # g.db.execute(
@@ -293,8 +298,12 @@ def get_class(saved):
             jsonData['gender_class'] = gender_class_list
             jsonData['gender_prob'] = gender_prob_list
             return_data = json.dumps(jsonData)
+            current_conn.close()
             # print(return_data)
             return (return_data)
 
 if __name__ == '__main__':
-    app.run()
+    # app.run(host='0.0.0.0', port=9593, ssl_context=('/Users/diweng/test/server.crt', '/Users/diweng/test/server.key'))
+    context = ('/Users/diweng/test/server.crt','/Users/diweng/test/server.key')
+    # app.run(host='0.0.0.0', port=9593)
+    app.run(host='0.0.0.0', port=9593,ssl_context=context)

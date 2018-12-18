@@ -312,5 +312,5 @@ def get_class(saved):
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=9593, ssl_context=('/Users/diweng/test/server.crt', '/Users/diweng/test/server.key'))
     context = ('/Users/diweng/test/server.crt','/Users/diweng/test/server.key')
-    app.run(host='0.0.0.0', port=9593)
-    # app.run(host='0.0.0.0', port=9593,ssl_context=context)
+    # app.run(host='0.0.0.0', port=9593)
+    app.run(host='0.0.0.0', port=9593,ssl_context=context)

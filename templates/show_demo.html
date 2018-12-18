@@ -8,6 +8,10 @@
 {% endblock %}
 {% block style %}
 <style type="text/css">
+    .boxcontainer {
+        display: grid;
+        grid-template-rows: 200px 200px;
+    }
     .boxes /*这是关键*/
             {
                 display: flex;
@@ -22,6 +26,7 @@
                 margin: 5px;
                 padding: 10px;
                 width: 100px;/*每个元素的初始化宽度,这是关键*/
+                height: 50%;
             }
             .box1
             {
@@ -72,12 +77,12 @@
 		var recorder;
 		var audio = document.querySelector('audio');
 
-		function getResults(j){
-		    var file = document.getElementById('file_'+j).files[0];
+		function getResults(k,j){
+		    var file = document.getElementById('file_'+k+j).files[0];
             var url = URL.createObjectURL(file);
             console.log(url);
-            document.getElementById("audio_id_"+j).src = url;
-		    var target = document.getElementById('show_'+j);
+            document.getElementById("audio_id_"+k+j).src = url;
+		    var target = document.getElementById('show_'+k+j);
 			spinner.spin(target);
             var fd = new FormData();
 			fd.append("audioData", file);
@@ -124,8 +129,8 @@
                         sentence+="本机器无法识别您，请问您真的来自地球吗？";//none
                          }
 
-					insert_html = '<div align="center">\n' +
-							'\t\t\t<h3>Sentiment Predicted\n'+'</h3>\n';
+					insert_html = '<div align="center">\n'+
+                    '\t\t\t<h4>Sentiment Predicted\n'+'</h4>\n';;
 					for (var i = 0; i < class_data.emotion_class.length; i++) {
 						console.log(class_data.emotion_class[i]);
 						insert_html += '\n\t\t\t<div class="row" align="center">\n' +
@@ -142,7 +147,7 @@
 					insert_html += '<h4 align="center">'+sentence+'</h4>'+'\t\t</div>';
 					console.log(insert_html);
 					spinner.spin();
-					document.getElementById("show_"+j).innerHTML= insert_html
+					document.getElementById("show_"+k+j).innerHTML= insert_html
 				}
 			};
 			xmlhttp.open("POST","{{ url_for('get_class',saved="1") }}",true);
@@ -151,18 +156,23 @@
 			xmlhttp.send(fd);
 		}
 	</script>
+    {% for k in range(2) %}
+    <div class="boxcontainer">
     <div class="boxes">
     {% for j in range(3) %}
             <div class="box box1">
                 <div class="container" align="center">
-					<input type="file" id="file_{{ j }}" onchange="getResults({{ j }})">
-                    <audio id="audio_id_{{ j }}" controls="controls">
+					<input type="file" id="file_{{ k }}{{ j }}" onchange="getResults({{ k }},{{ j }})">
+                    <audio id="audio_id_{{ k }}{{ j }}" controls="controls">
                         Your browser can't support HTML5 Audio</audio>
-                    <div id = "show_{{ j }}" align="left"></div>
+                    <div id = "show_{{ k }}{{ j }}" align="left"></div>
                 </div>
 
             </div>
 
 {% endfor %}
         </div>
+    </div>
+    {% endfor %}
+
 {% endblock %}

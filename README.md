@@ -31,4 +31,5 @@ predict_class,predict_prob,result_dic = get_audioclass(model,wav_file_path,all =
 ```
 
 ## References
-https://github.com/RayanWang/Speech_emotion_recognition_BLSTM
+* https://github.com/RayanWang/Speech_emotion_recognition_BLSTM
+* Li, D., Mei, H., Shen, Y., Su, S., Zhang, W., Wang, J., ... & Chen, W. (2018). ECharts: A declarative framework for rapid construction of web-based visualization. Visual Informatics.

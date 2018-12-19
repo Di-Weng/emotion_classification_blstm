@@ -19,9 +19,13 @@
 	<input type="button" value="播放录音" onclick="playRecord()"/>
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
 	</p>
-        <div id="countingdown" align="center"><span id="time">3</span>秒之后，录音自动停止</div>
+        <div id="beforeRecord" align="center"><span id="time0">3</span>秒之后，开始录音</div>
+        <div id="beginRecord" align="center">开始录音</div>
+        <div id="countingdown" align="center">正在录音...<span id="time">3</span>/3</div>
 
 	<script>
+        document.getElementById("beforeRecord").style.display="none";
+        document.getElementById("beginRecord").style.display="none";
         document.getElementById("countingdown").style.display="none";
 
 		var class_data = {
@@ -59,33 +63,38 @@
 		var recorder;
 		var audio = document.querySelector('audio');
 		var userName=prompt("请输入您的用户名：");
+
 		function startRecording() {
-            if( userName!=""){
-                if(userName!=null){
-                alert(userName+",welcome to our world!(点击“确定”开始录音)");}
-            }
-            else{
-                userName="admin";
-                alert(userName+",welcome to our world!(点击“确定”开始录音)");
-            }
-            document.getElementById("countingdown").style.display='block';
-
-			HZRecorder.get(function (rec) {
-                recorder = rec;
-                recorder.start();
-			});
-
+            document.getElementById("beforeRecord").style.display='block';
             var seconds = 0;
             setInterval(function () {
                 seconds += 1;
-                document.getElementById('time').innerHTML = 3 - seconds;
-                if(seconds>3) {
-                    stopRecord();
+                document.getElementById('time0').innerHTML = 3 - seconds;
+                if(seconds==3) {
+                    document.getElementById("beforeRecord").style.display='none';
+                    document.getElementById("beginRecord").style.display='block';
+                    HZRecorder.get(function (rec) {
+                    recorder = rec;
+                    recorder.start();
+			});
                 }
+                if(seconds>=4){
+                    document.getElementById("beginRecord").style.display='none';
+                    document.getElementById("countingdown").style.display='block';
+                    document.getElementById('time').innerHTML = seconds-3;
+                    if(seconds>=7){
+                        document.getElementById("countingdown").style.display='none';
+                        stopRecord();
+                    }
+                }
+
+
             },1000);
 
 
+
         };
+
 
 
 		function obtainRecord(){

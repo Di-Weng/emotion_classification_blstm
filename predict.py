@@ -42,9 +42,9 @@ import os
 #获取音频
 from get_audio import microphone_audio
 
-classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
+# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
 classes_e_n = {0: 'emotional', 1: 'neutral'}
-# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
+classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
 gender_classes = {0:'male',1:'female'}
 
 max_len = 1024
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     # CHANNELS = 1
     # RATE = 16000
 
-    test_file = 'recordFiles/20181211164803_1595.wav'
+    test_file = 'input.wav'
     test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
     model_path = 'model/best_model.h5'
     model = load_model(model_path)
@@ -271,3 +271,4 @@ if __name__ == '__main__':
     # print(analyse_emotionn(model,test_file))
     emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
                                                                                     all=True)
+    print(emotion_class_dic)

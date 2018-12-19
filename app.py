@@ -13,9 +13,9 @@ from flask import Markup
 import json
 from keras.models import load_model
 import pymongo
-from pyecharts import ThemeRiver
 from keras import backend as K
 from OpenSSL import SSL
+from predict import classes
 # set GPU memory
 if('tensorflow' == K.backend()):
     import tensorflow as tf
@@ -34,7 +34,7 @@ DEBUG = True
 SECRET_KEY = 'developmentkey'
 USERNAME = 'admin'
 PASSWORD = 'default'
-emotion_model_path = 'model/best_model.h5'
+emotion_model_path = 'model/best_model_2.h5'
 gender_model_path = 'model/gender_model.h5'
 emotion_neutral_model_prepath = 'model/emotion_neutral_model_'
 collection_name = 'user_emotion_1'
@@ -143,7 +143,6 @@ def conn_mongo(ServerURL = '192.168.12.120',db_name = 'user_sentiment'):
                                password='wd123456',
                                )
     db = conn[db_name]
-    print(ServerURL)
     return db,conn
 
 
@@ -228,17 +227,15 @@ def get_class(saved):
             print(filename)
 
             # list长度为5， 每个元素代表每个模型判断语音数据为emotional的概率
-            emotional_probility_list = []
-
             # whether_emotional_str， emotional 或 neutral；前者为带情感， 后者为不带情感
             whether_emotional_str,emotional_probility_list = whether_emotional(filename)
             print(whether_emotional_str)
             print(emotional_probility_list)
-            emoFlag=0
-            for emoItem in emotional_probility_list:
-                if(emoItem>0.5):
-                    emoFlag=1
-                    break
+            if(whether_emotional_str == 'emotional'):
+                emoFlag = 1
+            else:
+                emoFlag = 0
+
             # gender prediction
             with sess2.as_default():
                 with sess2.graph.as_default():
@@ -256,26 +253,23 @@ def get_class(saved):
                 gender_class_list.append(current_gender_class)
                 gender_prob_list.append(float(current_gender_prob))
             current_db, current_conn = conn_mongo()
+
             # emotion prediction
             if(emoFlag==1):
                 with sess1.as_default():
                     with sess1.graph.as_default():
                         emotion_predict_class, emotion_predict_prob,emotion_class_dic  = get_audioclass(emotion_model, filename,
                                                                                                         'emotion', all=True)
-
-
                 for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
                     emotion_class_list.append(current_emotion_class)
                     emotion_prob_list.append(float(current_emotion_prob))
             else:
                 emotion_class_list=['angry','fear','happy','neutral','sad','surprise']
+
                 emotion_prob_list=[0,0,0,1,0,0]
                 emotion_class_dic={}
                 for i in range(6):
                     emotion_class_dic[emotion_class_list[i]]=emotion_prob_list[i]
-
-
-
 
             if(saved=="0"):
                 timeItem=str(datetime.datetime.strftime(timenow, '%Y-%m-%d %H:%M:%S'))
@@ -298,7 +292,6 @@ def get_class(saved):
                             happy=current_data['happy'], surprise=current_data['surprise']) for current_data in
                        current_collection.find()]
                 print(lis)
-
 
 
             jsonData['emotion_class'] = emotion_class_list

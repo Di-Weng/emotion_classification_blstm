@@ -18,15 +18,12 @@
 	<input type="button" value="停止录音" onclick="stopRecord()"/>
 	<input type="button" value="播放录音" onclick="playRecord()"/>
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
-
 	</p>
-{#        <div class="col-md-2 skilltitle">HTML5</div>#}
-{#                        <div class="col-md-8">#}
-{#                            <div class="progress">#}
-{#                                <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 90%;">#}
-{#                                </div>#}
-{#                                <div>90%</div>#}
+        <div id="countingdown" align="center"><span id="time">3</span>秒之后，录音自动停止</div>
+
 	<script>
+        document.getElementById("countingdown").style.display="none";
+
 		var class_data = {
 			emotion_class:[],
 			emotion_prob:[],
@@ -65,18 +62,31 @@
 		function startRecording() {
             if( userName!=""){
                 if(userName!=null){
-                alert(userName+",welcome to our world!(现已开始录音)");}
+                alert(userName+",welcome to our world!(点击“确定”开始录音)");}
             }
             else{
                 userName="admin";
-                alert(userName+",welcome to our world!(现已开始录音)");
+                alert(userName+",welcome to our world!(点击“确定”开始录音)");
             }
+            document.getElementById("countingdown").style.display='block';
 
 			HZRecorder.get(function (rec) {
-				recorder = rec;
-				recorder.start();
+                recorder = rec;
+                recorder.start();
 			});
-		}
+
+            var seconds = 0;
+            setInterval(function () {
+                seconds += 1;
+                document.getElementById('time').innerHTML = 3 - seconds;
+                if(seconds>3) {
+                    stopRecord();
+                }
+            },1000);
+
+
+        };
+
 
 		function obtainRecord(){
 			var record = recorder.getBlob();
@@ -84,12 +94,15 @@
 		};
 
 		function stopRecord(){
+		    document.getElementById("countingdown").style.display="none";
 			recorder.stop();
 		};
 
 		function playRecord(){
 			recorder.play(audio);
 		};
+
+
 
 		function uploadRecord(){
 			var target = document.getElementById('show');

@@ -64,7 +64,8 @@ step = 0.01     # 10 msec time step
 
 def get_data(audio_path):
     # 采样率16000
-    data, sr = librosa.load(audio_path, sr=16000)
+    # 前1秒为噪声提取
+    data, sr = librosa.load(audio_path, sr=16000, offset=1, duration=3)
     return data, sr
 
 

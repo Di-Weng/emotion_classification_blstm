@@ -20,12 +20,11 @@
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
 	</p>
         <div id="beforeRecord" align="center"><span id="time0">3</span>秒之后，开始录音</div>
-        <div id="beginRecord" align="center">开始录音</div>
         <div id="countingdown" align="center">正在录音...<span id="time">3</span>/3</div>
 
 	<script>
         document.getElementById("beforeRecord").style.display="none";
-        document.getElementById("beginRecord").style.display="none";
+        // document.getElementById("beginRecord").style.display="none";
         document.getElementById("countingdown").style.display="none";
 
 		var class_data = {
@@ -63,30 +62,40 @@
 		var recorder;
 		var audio = document.querySelector('audio');
 		var userName=prompt("请输入您的用户名：");
-
+		var interval_stop = 0;
 		function startRecording() {
             document.getElementById("beforeRecord").style.display='block';
+			document.getElementById('time0').innerHTML = 3;
+			interval_stop = 0;
+
             var seconds = 0;
-            setInterval(function () {
+            var interval = setInterval(function () {
                 seconds += 1;
+                console.log(seconds);
                 document.getElementById('time0').innerHTML = 3 - seconds;
-                if(seconds==3) {
-                    document.getElementById("beforeRecord").style.display='none';
-                    document.getElementById("beginRecord").style.display='block';
+                if(interval_stop===1){
+					clearInterval(interval);
+					document.getElementById("beforeRecord").style.display='none';
+					document.getElementById("countingdown").style.display='none';
+					return;
+				}
+                if(seconds===2) {
                     HZRecorder.get(function (rec) {
-                    recorder = rec;
-                    recorder.start();
-			});
+						recorder = rec;
+						recorder.start();
+					});
                 }
-                if(seconds>=4){
-                    document.getElementById("beginRecord").style.display='none';
+                if(seconds>=3){
+					document.getElementById("beforeRecord").style.display='none';
                     document.getElementById("countingdown").style.display='block';
-                    document.getElementById('time').innerHTML = seconds-3;
-                    if(seconds>=7){
-                        document.getElementById("countingdown").style.display='none';
-                        stopRecord();
-                    }
+                    document.getElementById('time').innerHTML = seconds-2;
+                    if(seconds>=6){
+						document.getElementById("countingdown").style.display='none';
+						stopRecord();
+						clearInterval(interval);
+					}
                 }
+
 
 
             },1000);
@@ -103,7 +112,9 @@
 		};
 
 		function stopRecord(){
+			interval_stop = 1;
 		    document.getElementById("countingdown").style.display="none";
+			document.getElementById("beforeRecord").style.display='none';
 			recorder.stop();
 		};
 

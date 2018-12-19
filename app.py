@@ -13,7 +13,6 @@ from flask import Markup
 import json
 from keras.models import load_model
 import pymongo
-from pyecharts import ThemeRiver
 from keras import backend as K
 from OpenSSL import SSL
 from predict import classes
@@ -36,10 +35,10 @@ SECRET_KEY = 'developmentkey'
 USERNAME = 'admin'
 PASSWORD = 'default'
 emotion_model_path = 'model/best_model_2.h5'
-emotion_model_path = 'model/best_model.h5'
 gender_model_path = 'model/gender_model.h5'
 emotion_neutral_model_prepath = 'model/emotion_neutral_model_'
 collection_name = 'user_emotion_1'
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 加载第一个模型
 g1 = tf.Graph() # 加载到Session 1的graph
@@ -111,6 +110,14 @@ def close_db(error):
     if hasattr(g,'sqlite_db'):
         g.sqlite_db.close()
 
+def sox_noiseclean(file_inputpath,noise_filepath,outputfile_path):
+    extract_noise = 'sox '+ APP_ROOT + '/' + file_inputpath + ' -t null /dev/null trim 0 1 noiseprof ' + APP_ROOT + '/' + noise_filepath
+    clean_noise = 'sox ' + APP_ROOT + '/' + file_inputpath + ' ' + APP_ROOT + '/' +  outputfile_path + ' noisered ' + APP_ROOT + '/' + noise_filepath + ' 0.26'
+    print(extract_noise)
+    print(clean_noise)
+    print(os.system(extract_noise))
+    print(os.system(clean_noise))
+
 # @app.route('/')
 # def hello_world():
 #     return 'Hello World!'
@@ -145,7 +152,6 @@ def conn_mongo(ServerURL = '192.168.12.120',db_name = 'user_sentiment'):
                                password='wd123456',
                                )
     db = conn[db_name]
-    print(ServerURL)
     return db,conn
 
 
@@ -223,26 +229,31 @@ def get_class(saved):
         if request.method == 'POST':
             userName=request.headers["userName"]
             timenow = datetime.datetime.now()
-            filename = "recordFiles/" + userName+"_"+datetime.datetime.strftime(timenow, '%Y%m%d%H%M%S') + "_" + str(
-                random.randint(1, 10000)) + ".wav"
+            date_time = datetime.datetime.strftime(timenow, '%Y%m%d%H%M%S')
+            rand_int = random.randint(1, 10000)
+            file_name = userName+"_"+date_time + "_" + str(rand_int)
+            original_filename = "recordFiles/original/" + file_name + ".wav"
             # if(saved == "0"):
-            request.files['audioData'].save(filename)
-            print(filename)
+            request.files['audioData'].save(original_filename)
+            print(file_name)
+
+            noise_filename = "recordFiles/noise/" + file_name
+
+            #使用降噪后的音频
+            filename = "recordFiles/clean/" + file_name + ".wav"
+
+            sox_noiseclean(original_filename,noise_filename,filename)
 
             # list长度为5， 每个元素代表每个模型判断语音数据为emotional的概率
-            emotional_probility_list = []
-
             # whether_emotional_str， emotional 或 neutral；前者为带情感， 后者为不带情感
             whether_emotional_str,emotional_probility_list = whether_emotional(filename)
             print(whether_emotional_str)
             print(emotional_probility_list)
-            emoFlag=0
-            num=0
-            for emoItem in emotional_probility_list:
-                if(emoItem>0.5):
-                    num+=1
-            if(num>=3):
-                emoFlag=1
+            if(whether_emotional_str == 'emotional'):
+                emoFlag = 1
+            else:
+                emoFlag = 0
+
             # gender prediction
             with sess2.as_default():
                 with sess2.graph.as_default():
@@ -260,26 +271,23 @@ def get_class(saved):
                 gender_class_list.append(current_gender_class)
                 gender_prob_list.append(float(current_gender_prob))
             current_db, current_conn = conn_mongo()
+
             # emotion prediction
             if(emoFlag==1):
                 with sess1.as_default():
                     with sess1.graph.as_default():
                         emotion_predict_class, emotion_predict_prob,emotion_class_dic  = get_audioclass(emotion_model, filename,
                                                                                                         'emotion', all=True)
-
-
                 for current_emotion_class, current_emotion_prob in emotion_class_dic.items():
                     emotion_class_list.append(current_emotion_class)
                     emotion_prob_list.append(float(current_emotion_prob))
             else:
                 emotion_class_list=['angry','fear','happy','neutral','sad','surprise']
+
                 emotion_prob_list=[0,0,0,1,0,0]
                 emotion_class_dic={}
                 for i in range(6):
                     emotion_class_dic[emotion_class_list[i]]=emotion_prob_list[i]
-
-
-
 
             if(saved=="0"):
                 timeItem=str(datetime.datetime.strftime(timenow, '%Y-%m-%d %H:%M:%S'))
@@ -290,19 +298,18 @@ def get_class(saved):
                         # selfEmo.append(emotion_class_dic[item]*100)
                         data_mongo[item] = emotion_class_dic[item]*100
                         # print(selfEmo)
-                        print(data_mongo)
+                        # print(data_mongo)
 
 
                 current_collection = current_db[collection_name]
                 result = current_collection.insert_one(data_mongo)
-                print(result)
+                # print(result)
 
                 lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
                             angry=current_data['angry'], sad=current_data['sad'], fear=current_data['fear'],
                             happy=current_data['happy'], surprise=current_data['surprise']) for current_data in
                        current_collection.find()]
-                print(lis)
-
+                # print(lis)
 
 
             jsonData['emotion_class'] = emotion_class_list
@@ -316,5 +323,5 @@ def get_class(saved):
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=9593, ssl_context=('/Users/diweng/test/server.crt', '/Users/diweng/test/server.key'))
     context = ('/Users/diweng/test/server.crt','/Users/diweng/test/server.key')
-    # app.run(host='0.0.0.0', port=9593)
-    app.run(host='0.0.0.0', port=9593,ssl_context=context)
+    app.run(host='0.0.0.0', port=9593)
+    # app.run(host='0.0.0.0', port=9593,ssl_context=context)

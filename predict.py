@@ -43,7 +43,6 @@ import os
 from get_audio import microphone_audio
 
 # classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
-# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
 classes_e_n = {0: 'emotional', 1: 'neutral'}
 classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
 gender_classes = {0:'male',1:'female'}
@@ -65,7 +64,8 @@ step = 0.01     # 10 msec time step
 
 def get_data(audio_path):
     # 采样率16000
-    data, sr = librosa.load(audio_path, sr=16000)
+    # 前1秒为噪声提取
+    data, sr = librosa.load(audio_path, sr=16000, offset=1, duration=3)
     return data, sr
 
 
@@ -145,11 +145,7 @@ def test_model(model_path, test_folder, model_type = 'emotion'):
                 predict_output = model.predict([f_ex, f])
                 predict_prob, predict_label = find_max(predict_output)
                 predict_class = classes[predict_label]
-
-                if(predict_class=='neutral'):
-                    continue
                 total += 1
-
                 emotion_total += 1
                 if(predict_class == current_emotion):
                     emotion_count += 1
@@ -262,17 +258,17 @@ if __name__ == '__main__':
     # CHANNELS = 1
     # RATE = 16000
 
-    test_file = 'recordFiles/20181211164803_1595.wav'
+    test_file = 'input.wav'
     test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-    model_path = 'model/weights_blstm_hyperas_1.h5'
-    # model_path = 'model/gender_model.h5'
+    model_path = 'model/best_model.h5'
     model = load_model(model_path)
 
-    test_model(model_path,test_folder,model_type='emotion')
+    # test_model(model_path,test_folder,model_type='gender')
 
     # #获取音频
     # microphone_audio(test_file)
     #
     #验证模型正确率
     # print(analyse_emotionn(model,test_file))
-    # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',all=True)
+    emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
+                                                                                    all=True)

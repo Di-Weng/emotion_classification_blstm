@@ -142,7 +142,7 @@
 					class_data.gender_class = data.gender_class;
 					class_data.gender_prob = data.gender_prob;
                     var sentence="";
-                    if(class_data.gender_prob[0]>=0){
+                    if(class_data.gender_prob[0]>=0.5){
                         sentence+="小伙子，";//
                     }
                     else if(class_data.gender_prob[1]>=0.5){

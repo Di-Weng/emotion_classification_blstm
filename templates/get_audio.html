@@ -18,15 +18,15 @@
 	<input type="button" value="停止录音" onclick="stopRecord()"/>
 	<input type="button" value="播放录音" onclick="playRecord()"/>
 	<input type="button" value="上传录音" onclick="uploadRecord()"/>
-
 	</p>
-{#        <div class="col-md-2 skilltitle">HTML5</div>#}
-{#                        <div class="col-md-8">#}
-{#                            <div class="progress">#}
-{#                                <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 90%;">#}
-{#                                </div>#}
-{#                                <div>90%</div>#}
+        <div id="beforeRecord" align="center"><span id="time0">3</span>秒之后，开始录音</div>
+        <div id="countingdown" align="center">正在录音...<span id="time">3</span>/3</div>
+
 	<script>
+        document.getElementById("beforeRecord").style.display="none";
+        // document.getElementById("beginRecord").style.display="none";
+        document.getElementById("countingdown").style.display="none";
+
 		var class_data = {
 			emotion_class:[],
 			emotion_prob:[],
@@ -62,21 +62,49 @@
 		var recorder;
 		var audio = document.querySelector('audio');
 		var userName=prompt("请输入您的用户名：");
+		var interval_stop = 0;
 		function startRecording() {
-            if( userName!=""){
-                if(userName!=null){
-                alert(userName+",welcome to our world!(现已开始录音)");}
-            }
-            else{
-                userName="admin";
-                alert(userName+",welcome to our world!(现已开始录音)");
-            }
+            document.getElementById("beforeRecord").style.display='block';
+			document.getElementById('time0').innerHTML = 3;
+			interval_stop = 0;
 
-			HZRecorder.get(function (rec) {
-				recorder = rec;
-				recorder.start();
-			});
-		}
+            var seconds = 0;
+            var interval = setInterval(function () {
+                seconds += 1;
+                console.log(seconds);
+                document.getElementById('time0').innerHTML = 3 - seconds;
+                if(interval_stop===1){
+					clearInterval(interval);
+					document.getElementById("beforeRecord").style.display='none';
+					document.getElementById("countingdown").style.display='none';
+					return;
+				}
+                if(seconds===2) {
+                    HZRecorder.get(function (rec) {
+						recorder = rec;
+						recorder.start();
+					});
+                }
+                if(seconds>=3){
+					document.getElementById("beforeRecord").style.display='none';
+                    document.getElementById("countingdown").style.display='block';
+                    document.getElementById('time').innerHTML = seconds-2;
+                    if(seconds>=6){
+						document.getElementById("countingdown").style.display='none';
+						stopRecord();
+						clearInterval(interval);
+					}
+                }
+
+
+
+            },1000);
+
+
+
+        };
+
+
 
 		function obtainRecord(){
 			var record = recorder.getBlob();
@@ -84,12 +112,17 @@
 		};
 
 		function stopRecord(){
+			interval_stop = 1;
+		    document.getElementById("countingdown").style.display="none";
+			document.getElementById("beforeRecord").style.display='none';
 			recorder.stop();
 		};
 
 		function playRecord(){
 			recorder.play(audio);
 		};
+
+
 
 		function uploadRecord(){
 			var target = document.getElementById('show');

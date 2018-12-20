@@ -251,6 +251,38 @@ def get_audioclass(model,test_file,model_type = 'emotion',all = False):
 
 
 
+def model_confusion_matrix(model, test_folder,model_type):
+    if(model_type == 'emotion'):
+        # 真实结果的预测结果list, y为真实结果，x为预测结果
+        result_list = []
+        emotion_list = ['angry','fear','happy','sad','surprise']
+        for current_emotion in emotion_list:
+            result_list.append([0 for i in range(len(emotion_list))])
+
+            for current_emotion in emotion_list:
+                if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
+                    continue
+
+                current_emotion_path = test_folder + '/' + current_emotion
+                test_file_list = os.listdir(current_emotion_path)
+
+                for current_test_file in test_file_list:
+                    if (not current_test_file.endswith('.wav')):
+                        continue
+                    test_file_path = current_emotion_path + '/' + current_test_file
+                    data, sr = get_data(test_file_path)
+                    f = extract_dataset_tosequence(data, sr)
+                    f_ex = np.full((f.shape[0], nb_attention_param),
+                                   attention_init_value, dtype=np.float32)
+                    predict_output = model.predict([f_ex, f])
+                    predict_prob, predict_label = find_max(predict_output)
+
+                    result_list[emotion_list.index(current_emotion)][int(predict_label)] += 1
+                    print(result_list)
+
+
+
+        print(result_list)
 if __name__ == '__main__':
 
     #input wav format
@@ -260,7 +292,7 @@ if __name__ == '__main__':
 
     test_file = 'input.wav'
     test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-    model_path = 'model/best_model.h5'
+    model_path = 'model/five_emotion_model.h5'
     model = load_model(model_path)
 
     # test_model(model_path,test_folder,model_type='gender')
@@ -270,5 +302,7 @@ if __name__ == '__main__':
     #
     #验证模型正确率
     # print(analyse_emotionn(model,test_file))
-    emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
-                                                                                    all=True)
+    # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
+    #                                                                                 all=True)
+
+    model_confusion_matrix(model,test_folder,model_type='emotion')

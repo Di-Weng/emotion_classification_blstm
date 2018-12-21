@@ -42,9 +42,9 @@ import os
 #获取音频
 from get_audio import microphone_audio
 
-# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
+classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
 classes_e_n = {0: 'emotional', 1: 'neutral'}
-classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
+# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
 gender_classes = {0:'male',1:'female'}
 
 max_len = 1024
@@ -65,7 +65,8 @@ step = 0.01     # 10 msec time step
 def get_data(audio_path):
     # 采样率16000
     # 前1秒为噪声提取
-    data, sr = librosa.load(audio_path, sr=16000, offset=1, duration=3)
+    # data, sr = librosa.load(audio_path, sr=16000, offset=1.0, duration=3.0)
+    data, sr = librosa.load(audio_path, sr=16000)
     return data, sr
 
 
@@ -134,7 +135,7 @@ def test_model(model_path, test_folder, model_type = 'emotion'):
             current_emotion_path = test_folder + '/' + current_emotion
             test_file_list = os.listdir(current_emotion_path)
             for current_test_file in test_file_list:
-                if (current_test_file == '.DS_Store' or current_test_file == '_desktop.ini'):
+                if (not current_test_file.endswith('.wav')):
                     continue
 
                 test_file_path = current_emotion_path + '/' + current_test_file
@@ -255,15 +256,52 @@ def model_confusion_matrix(model, test_folder,model_type):
     if(model_type == 'emotion'):
         # 真实结果的预测结果list, y为真实结果，x为预测结果
         result_list = []
-        emotion_list = ['angry','fear','happy','sad','surprise']
+        emotion_list = ['angry','fear','happy','neutral','sad','surprise']
         for current_emotion in emotion_list:
             result_list.append([0 for i in range(len(emotion_list))])
 
-            for current_emotion in emotion_list:
-                if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
-                    continue
+        for current_emotion in emotion_list:
+            if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
+                continue
 
-                current_emotion_path = test_folder + '/' + current_emotion
+            current_emotion_path = test_folder + '/' + current_emotion
+            test_file_list = os.listdir(current_emotion_path)
+
+            for current_test_file in test_file_list:
+                if (not current_test_file.endswith('.wav')):
+                    continue
+                test_file_path = current_emotion_path + '/' + current_test_file
+                data, sr = get_data(test_file_path)
+                f = extract_dataset_tosequence(data, sr)
+                f_ex = np.full((f.shape[0], nb_attention_param),
+                               attention_init_value, dtype=np.float32)
+                predict_output = model.predict([f_ex, f])
+                predict_prob, predict_label = find_max(predict_output)
+
+                result_list[emotion_list.index(current_emotion)][int(predict_label)] += 1
+                print(result_list)
+    elif (model_type == 'gender'):
+        # 真实结果的预测结果list, y为真实结果，x为预测结果
+        result_list = []
+        gender_list = ['male', 'female']
+        male_list = ['Zhe.Wang','Zuoxiang.Zhao']
+        female_list=['Chang.Liu','Quanyin.Zhao',]
+        emotion_list = ['angry', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+        for current_gender in gender_list:
+            result_list.append([0 for i in range(len(gender_list))])
+        speak_list = os.listdir(test_folder)
+        for current_speak in speak_list:
+
+            if(current_speak in male_list):
+                gender = 0
+            elif(current_speak in female_list):
+                gender = 1
+            else:
+                continue
+            speak_path = test_folder + '/' + current_speak
+            for current_emotion in emotion_list:
+
+                current_emotion_path = speak_path + '/' + current_emotion
                 test_file_list = os.listdir(current_emotion_path)
 
                 for current_test_file in test_file_list:
@@ -277,12 +315,10 @@ def model_confusion_matrix(model, test_folder,model_type):
                     predict_output = model.predict([f_ex, f])
                     predict_prob, predict_label = find_max(predict_output)
 
-                    result_list[emotion_list.index(current_emotion)][int(predict_label)] += 1
+                    result_list[gender_list.index(gender)][int(predict_label)] += 1
                     print(result_list)
-
-
-
         print(result_list)
+
 if __name__ == '__main__':
 
     #input wav format
@@ -291,11 +327,11 @@ if __name__ == '__main__':
     # RATE = 16000
 
     test_file = 'input.wav'
-    test_folder = '/Users/diweng/github_project/keras_audio_classifier/data/test'
-    model_path = 'model/five_emotion_model.h5'
+    test_folder = '/Volumes/data/CAS/不同文本100/ChangLiu'
+    model_path = 'model/test_1.h5'
     model = load_model(model_path)
 
-    # test_model(model_path,test_folder,model_type='gender')
+    test_model(model_path,test_folder,model_type='emotion')
 
     # #获取音频
     # microphone_audio(test_file)
@@ -305,4 +341,4 @@ if __name__ == '__main__':
     # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
     #                                                                                 all=True)
 
-    model_confusion_matrix(model,test_folder,model_type='emotion')
+    # model_confusion_matrix(model,test_folder,model_type='gender')

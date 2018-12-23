@@ -38,20 +38,20 @@ from scipy import stats
 import pickle
 import librosa
 import os
+from keras import backend as K
 
 #获取音频
 from get_audio import microphone_audio
 
-classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
+# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'neutral', 4: 'sad', 5: 'surprise'}
 classes_e_n = {0: 'emotional', 1: 'neutral'}
-# classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
+classes = {0: 'angry', 1: 'fear', 2: 'happy', 3: 'sad', 4: 'surprise'}
 gender_classes = {0:'male',1:'female'}
 
 max_len = 1024
 nb_features = 36
 nb_attention_param = 256
 attention_init_value = 1.0 / 256
-nb_hidden_units = 512   # number of hidden layer units
 dropout_rate = 0.5
 nb_lstm_cells = 128
 nb_classes = 6
@@ -61,6 +61,13 @@ masking_value = -100.0
 frame_size = 0.025  # 25 msec segments
 step = 0.01     # 10 msec time step
 
+if('tensorflow' == K.backend()):
+    import tensorflow as tf
+    from keras.backend.tensorflow_backend import set_session
+
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
 
 def get_data(audio_path):
     # 采样率16000
@@ -256,14 +263,13 @@ def model_confusion_matrix(model, test_folder,model_type):
     if(model_type == 'emotion'):
         # 真实结果的预测结果list, y为真实结果，x为预测结果
         result_list = []
-        emotion_list = ['angry','fear','happy','neutral','sad','surprise']
+        # emotion_list = ['angry','fear','happy','neutral','sad','surprise']
+        # emotion_list = ['angry','fear','happy','sad','surprise']
+        emotion_list = ['angry','happy','sad']
         for current_emotion in emotion_list:
             result_list.append([0 for i in range(len(emotion_list))])
 
         for current_emotion in emotion_list:
-            if (current_emotion == '.DS_Store' or current_emotion == '_desktop.ini'):
-                continue
-
             current_emotion_path = test_folder + '/' + current_emotion
             test_file_list = os.listdir(current_emotion_path)
 
@@ -328,10 +334,10 @@ if __name__ == '__main__':
 
     test_file = 'input.wav'
     test_folder = '/Volumes/data/CAS/不同文本100/ChangLiu'
-    model_path = 'model/test_1.h5'
+    model_path = 'model/test_12.h5'
     model = load_model(model_path)
 
-    test_model(model_path,test_folder,model_type='emotion')
+    # test_model(model_path,test_folder,model_type='emotion')
 
     # #获取音频
     # microphone_audio(test_file)
@@ -340,5 +346,7 @@ if __name__ == '__main__':
     # print(analyse_emotionn(model,test_file))
     # emotion_predict_class, emotion_predict_prob, emotion_class_dic = get_audioclass(model, test_file, 'emotion',
     #                                                                                 all=True)
+    from keras.utils import plot_model
 
-    # model_confusion_matrix(model,test_folder,model_type='gender')
+    plot_model(model, to_file='model.png', show_shapes=True)
+    model_confusion_matrix(model,test_folder,model_type='emotion')

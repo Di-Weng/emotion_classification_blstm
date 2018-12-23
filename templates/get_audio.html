@@ -134,6 +134,8 @@
 			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 				xmlhttp = new XMLHttpRequest();
 			}
+			// ['anger', 'boredom', 'disgust','anxiety(fear)', 'happiness', 'sadness', 'neutral']
+
 			xmlhttp.onreadystatechange = function () {
 				if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
 					var data =  eval("("+xmlhttp.responseText+")") ;
@@ -152,19 +154,22 @@
                         sentence+="莫生气莫生气，人间不值得";//angry
                     }
                     else if(class_data.emotion_prob[1]>=0.5){
-                        sentence+="怕什么，信息系统开发实验课都要结课了";//fear
+                        sentence+="再写一篇paper就不无聊了";//boredom
                     }
                     else if(class_data.emotion_prob[2]>=0.5){
-                        sentence+="是你飘了还是我举不动刀了→_→";//happy
+                        sentence+="发生了啥让你那么讨厌";//disgust
                     }
                     else if(class_data.emotion_prob[3]>=0.5){
-                        sentence+="你的内心毫无波澜而且...还是毫无波澜";//neutral
+                        sentence+="怕什么，信息系统开发实验课都要结课了";//fear
                     }
                     else if(class_data.emotion_prob[4]>=0.5){
-                        sentence+="怎么？flask写不出来了？";//sad
+                        sentence+="是你飘了还是我举不动刀了→_→";//happy
                     }
                     else if(class_data.emotion_prob[5]>=0.5){
-                        sentence+="这么惊讶的吗？看来还是本机器见过的世面多啊哈哈";//surprise
+                        sentence+="怎么？flask写不出来了？";//sad
+                    }
+                    else if(class_data.emotion_prob[6]>=0.5){
+                        sentence+="你的内心毫无波澜而且...还是毫无波澜";//neutral
                     }
                     else {
                         sentence+="本机器无法识别您，请问您真的来自地球吗？";//none

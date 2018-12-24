@@ -100,37 +100,6 @@
 					class_data.emotion_prob = data.emotion_prob;
 					class_data.gender_class = data.gender_class;
 					class_data.gender_prob = data.gender_prob;
-                    var sentence="";
-                    if(class_data.gender_prob[0]>=0.5){
-                        sentence+="小伙子，";//
-                    }
-                    else if(class_data.gender_prob[1]>=0.5){
-                        sentence+="小姑娘，";
-                    }
-                    if(class_data.emotion_prob[0]>=0.5){
-                        sentence+="莫生气莫生气，人间不值得";//angry
-                    }
-                    else if(class_data.emotion_prob[1]>=0.5){
-                        sentence+="再写一篇paper就不无聊了";//boredom
-                    }
-                    else if(class_data.emotion_prob[2]>=0.5){
-                        sentence+="发生了啥让你那么讨厌";//disgust
-                    }
-                    else if(class_data.emotion_prob[3]>=0.5){
-                        sentence+="怕什么，信息系统开发实验课都要结课了";//fear
-                    }
-                    else if(class_data.emotion_prob[4]>=0.5){
-                        sentence+="是你飘了还是我举不动刀了→_→";//happy
-                    }
-                    else if(class_data.emotion_prob[5]>=0.5){
-                        sentence+="怎么？flask写不出来了？";//sad
-                    }
-                    else if(class_data.emotion_prob[6]>=0.5){
-                        sentence+="你的内心毫无波澜而且...还是毫无波澜";//neutral
-                    }
-                    else {
-                        sentence+="本机器无法识别您，请问您真的来自地球吗？";//none
-                    }
 
 					insert_html = '<div align="center">\n'+
                     '\t\t\t<h4>Sentiment Predicted\n'+'</h4>\n';;
@@ -147,7 +116,7 @@
 					'\t\t\t\t</div>\n' +
 					'\t\t\t</div>\n'
 					}
-					insert_html += '<h4 align="center">'+sentence+'</h4>'+'\t\t</div>';
+					insert_html += '\t\t</div>';
 					console.log(insert_html);
 					spinner.spin();
 					document.getElementById("show_"+k+j).innerHTML= insert_html

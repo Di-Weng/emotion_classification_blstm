@@ -135,7 +135,12 @@ def emo_visual():
     current_db,current_conn = conn_mongo()
     current_collection = current_db[collection_name]
     # lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
-    lis = [dict(userName = current_data['userName'],use_date=current_data['use_date'],angry = current_data['angry'],sad = current_data['sad'],fear = current_data['fear'],happy = current_data['happy'],surprise = current_data['surprise']) for current_data in current_collection.find()]
+    lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
+                            angry=current_data['angry'], bored=current_data['bored'], disgust=current_data['disgust'],
+                            anxious_fear=current_data['anxious_fear'],happy=current_data['happy'], sad = current_data['sad'],
+                            neutral=current_data['neutral']) for current_data in
+                       current_collection.find()]
+
     print(lis)
     current_conn.close()
     return render_template('emo_visual.html',lis = lis)
@@ -211,10 +216,11 @@ def get_class(saved):
                 current_collection = current_db[collection_name]
                 result = current_collection.insert_one(data_mongo)
                 # print(result)
-
+                # ['angry', 'bored', 'disgust','anxious_fear', 'happy', 'sad', 'neutral']
                 lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
-                            angry=current_data['angry'], sad=current_data['sad'], fear=current_data['fear'],
-                            happy=current_data['happy'], surprise=current_data['surprise']) for current_data in
+                            angry=current_data['angry'], bored=current_data['bored'], disgust=current_data['disgust'],
+                            anxious_fear=current_data['anxious_fear'],happy=current_data['happy'], sad = current_data['sad'],
+                            neutral=current_data['neutral']) for current_data in
                        current_collection.find()]
                 # print(lis)
 
@@ -229,5 +235,5 @@ def get_class(saved):
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=9593, ssl_context=('/Users/diweng/test/server.crt', '/Users/diweng/test/server.key'))
     context = ('/Users/diweng/test/server.crt','/Users/diweng/test/server.key')
-    # app.run(host='0.0.0.0', port=9593)
-    app.run(host='0.0.0.0', port=9593,ssl_context=context)
+    app.run(host='0.0.0.0', port=9593)
+    # app.run(host='0.0.0.0', port=9593,ssl_context=context)

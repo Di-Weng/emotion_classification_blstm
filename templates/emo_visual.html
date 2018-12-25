@@ -3,15 +3,15 @@
 <h1>为了把下列内容到可见处</h1>
 
 <div class="container" id="main" style="height: 90%"></div>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="static/js/echarts.min.js"></script>
+<script type="text/javascript" src="static/js/echarts-gl.min.js"></script>
+<script type="text/javascript" src="static/js/ecStat.min.js"></script>
+<script type="text/javascript" src="static/js/dataTool.min.js"></script>
+<script type="text/javascript" src="static/js/china.js"></script>
+<script type="text/javascript" src="static/js/world.js"></script>
 <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
-<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript" src="static/js/bmap.min.js"></script>
+<script type="text/javascript" src="static/js/simplex.js"></script>
 <script type="text/javascript">
     var user=prompt("请输入您的用户名：");
     var list = '{{lis|tojson}}';
@@ -19,11 +19,13 @@
     var data1 = new Array();
     for(var i=0;i<obj.length;i++){
         if(obj[i].userName == user){
-            data1.push([obj[i].use_date,obj[i].surprise,'surprise']);
             data1.push([obj[i].use_date,obj[i].angry,'angry']);
-            data1.push([obj[i].use_date,obj[i].sad,'sad']);
-            data1.push([obj[i].use_date,obj[i].fear,'fear']);
+            data1.push([obj[i].use_date,obj[i].bored,'bored']);
+            data1.push([obj[i].use_date,obj[i].disgust,'disgust']);
+            data1.push([obj[i].use_date,obj[i].anxious_fear,'anxious_fear']);
             data1.push([obj[i].use_date,obj[i].happy,'happy']);
+            data1.push([obj[i].use_date,obj[i].sad,'sad']);
+            data1.push([obj[i].use_date,obj[i].neutral,'neutral']);
         }
         }
     var dom = document.getElementById("main");
@@ -42,7 +44,7 @@
         },
 
         legend: {
-            data: ['surprise','angry', 'sad', 'fear', 'happy'],
+            data: ['angry', 'bored', 'disgust','anxious_fear', 'happy', 'sad', 'neutral'],
         },
 
         singleAxis: {
@@ -73,6 +75,11 @@
                     emphasis: {
                         shadowBlur: 20,
                         shadowColor: 'rgba(0, 0, 0, 0.8)'
+                    }
+                },
+                label: {
+                    normal: {
+                        show: false
                     }
                 },
                 data: data1

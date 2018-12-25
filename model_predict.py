@@ -14,7 +14,7 @@ import globalvars
 import librosa
 import numpy as np
 
-emotion_classes = ['angry', 'bored', 'disgust','anxious_fear', 'happy', 'sad', 'neutral']
+emotion_classes = ['angry', 'bored', 'disgust','anxious', 'happy', 'sad', 'neutral']
 
 
 def predict_class(data_path: str, current_model):

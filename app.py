@@ -137,7 +137,7 @@ def emo_visual():
     # lis = [dict(userName = row['userName'],use_date=row['use_date'],angry = row['angry'],sad = row['sad'],fear = row['fear'],happy = row['happy'],surprise = row['surprise']) for row in cur.fetchall()]
     lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
                             angry=current_data['angry'], bored=current_data['bored'], disgust=current_data['disgust'],
-                            anxious_fear=current_data['anxious_fear'],happy=current_data['happy'], sad = current_data['sad'],
+                            anxious=current_data['anxious'],happy=current_data['happy'], sad = current_data['sad'],
                             neutral=current_data['neutral']) for current_data in
                        current_collection.find()]
 
@@ -216,10 +216,10 @@ def get_class(saved):
                 current_collection = current_db[collection_name]
                 result = current_collection.insert_one(data_mongo)
                 # print(result)
-                # ['angry', 'bored', 'disgust','anxious_fear', 'happy', 'sad', 'neutral']
+                # ['angry', 'bored', 'disgust','anxious', 'happy', 'sad', 'neutral']
                 lis = [dict(userName=current_data['userName'], use_date=current_data['use_date'],
                             angry=current_data['angry'], bored=current_data['bored'], disgust=current_data['disgust'],
-                            anxious_fear=current_data['anxious_fear'],happy=current_data['happy'], sad = current_data['sad'],
+                            anxious=current_data['anxious'],happy=current_data['happy'], sad = current_data['sad'],
                             neutral=current_data['neutral']) for current_data in
                        current_collection.find()]
                 # print(lis)

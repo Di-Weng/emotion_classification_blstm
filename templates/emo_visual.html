@@ -19,13 +19,14 @@
     var data1 = new Array();
     for(var i=0;i<obj.length;i++){
         if(obj[i].userName == user){
-            data1.push([obj[i].use_date,obj[i].angry,'angry']);
-            data1.push([obj[i].use_date,obj[i].bored,'bored']);
+        	data1.push([obj[i].use_date,obj[i].happy,'happy']);
+        	data1.push([obj[i].use_date,obj[i].neutral,'neutral']);
+        	data1.push([obj[i].use_date,obj[i].bored,'bored']);
             data1.push([obj[i].use_date,obj[i].disgust,'disgust']);
             data1.push([obj[i].use_date,obj[i].anxious,'anxious']);
-            data1.push([obj[i].use_date,obj[i].happy,'happy']);
+            data1.push([obj[i].use_date,obj[i].angry,'angry']);
             data1.push([obj[i].use_date,obj[i].sad,'sad']);
-            data1.push([obj[i].use_date,obj[i].neutral,'neutral']);
+            
         }
         }
     var dom = document.getElementById("main");
@@ -44,7 +45,7 @@
         },
 
         legend: {
-            data: ['angry', 'bored', 'disgust','anxious', 'happy', 'sad', 'neutral'],
+            data: ['happy','neutral','bored', 'disgust','anxious','angry','sad'],
         },
 
         singleAxis: {
